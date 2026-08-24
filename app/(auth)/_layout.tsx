@@ -10,9 +10,11 @@ export default function AuthLayout() {
   // const colorScheme = useColorScheme();
 
   return (
-      // <ThemedView></ThemedView>
       <Stack>
-        
+        <Stack.Screen name='onboarding' options={{ headerShown: false }}/>
+        <Stack.Screen name='login' options={{ headerShown: false }}/>
+        <Stack.Screen name='usertype' options={{ headerShown: false }}/>
+        <Stack.Screen name='register' options={{ headerShown: false }}/>
       </Stack>
   );
 }

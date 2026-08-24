@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 // import { truncate } from '@/utils';
 
 const BASE_URL = 'https://api.medicpadi.com/api';
@@ -8,20 +8,20 @@ const USER_KEY = 'mp_user';
 
 // ── Token / user storage ──────────────────────────────────────────────────────
 
-export const storeToken = (token: string) => SecureStore.setItemAsync(TOKEN_KEY, token);
-export const getStoredToken = () => SecureStore.getItemAsync(TOKEN_KEY);
-export const clearStoredToken = () => SecureStore.deleteItemAsync(TOKEN_KEY);
+export const storeToken = (token: string) => storage.setItem(TOKEN_KEY, token);
+export const getStoredToken = () => storage.getItem(TOKEN_KEY);
+export const clearStoredToken = () => storage.deleteItem(TOKEN_KEY);
 
 export const storeUser = (user: AuthUser | null) => {
-  if (!user) return SecureStore.deleteItemAsync(USER_KEY);
-  return SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+  if (!user) return storage.deleteItem(USER_KEY);
+  return storage.setItem(USER_KEY, JSON.stringify(user));
 };
 export const getStoredUser = async (): Promise<AuthUser | null> => {
-  const val = await SecureStore.getItemAsync(USER_KEY);
+  const val = await storage.getItem(USER_KEY);
   return val ? JSON.parse(val) : null;
 };
 
-export const clearStoredUser = () => SecureStore.deleteItemAsync(USER_KEY);
+export const clearStoredUser = () => storage.deleteItem(USER_KEY);
 
 // ── Unauthorized callback (registered by AuthContext) ─────────────────────────
 

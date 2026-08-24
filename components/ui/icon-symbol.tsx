@@ -1,12 +1,14 @@
 // Fallback for using MaterialIcons on Android and web.
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
+import { SymbolViewProps, SymbolWeight } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
+// type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
+type IconMapping = Partial<Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>>;
+
+export type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -18,6 +20,24 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'chevron.left': 'chevron-left',
+
+    // ⬇️ New Additions ⬇️
+  'gearshape.fill': 'settings',
+  'person.fill': 'person',
+  'person.2.fill': 'group',
+  'bell.fill': 'notifications',
+  'magnifyingglass': 'search',
+  'plus': 'add',
+  'trash.fill': 'delete',
+  'exclamationmark.triangle.fill': 'warning',
+  'heart.fill': 'favorite',
+  'lock.fill': 'lock',
+
+  // Medical related
+  'stethoscope': 'medical-services', // Doctor (Stethoscope on iOS -> Medical Briefcase on Android)
+  'pill.fill': 'local-pharmacy',     // Pharmacy (Pill Capsule on iOS -> Cross Capsule on Android)
+  'flask.fill': 'science', 
 } as IconMapping;
 
 /**
@@ -28,12 +48,12 @@ const MAPPING = {
 export function IconSymbol({
   name,
   size = 24,
-  color,
   style,
+  color,
 }: {
   name: IconSymbolName;
   size?: number;
-  color: string | OpaqueColorValue;
+  color?: string | OpaqueColorValue;
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {

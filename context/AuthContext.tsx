@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -28,6 +29,7 @@ interface AuthContextType {
   user: AuthUser | null;
   profile: ProfileData | null;
   isLoading: boolean;
+  isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
@@ -43,12 +45,82 @@ export const useAuth = (): AuthContextType => {
   return ctx;
 };
 
+// Decodes a JWT payload and returns its `exp` claim in milliseconds since epoch.
+// Returns null if the token is malformed or has no exp claim.
+function getTokenExpiryMs(token: string): number | null {
+  try {
+    const payloadSegment = token.split('.')[1];
+    if (!payloadSegment) return null;
+
+    const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+
+    const jsonPayload = decodeURIComponent(
+      atob(padded)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+
+    const payload = JSON.parse(jsonPayload);
+    return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const expiryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearExpiryTimer = useCallback(() => {
+    if (expiryTimerRef.current) {
+      clearTimeout(expiryTimerRef.current);
+      expiryTimerRef.current = null;
+    }
+  }, []);
+
+  // Clears stored auth data and resets state when the token expires.
+  const handleTokenExpiry = useCallback(async () => {
+    clearExpiryTimer();
+    try {
+      await Promise.all([clearStoredToken(), clearStoredUser()]);
+    } catch {
+      // ignore — state reset below still happens
+    }
+    setToken(null);
+    setUser(null);
+    setProfile(null);
+    setIsLoggedIn(false);
+  }, [clearExpiryTimer]);
+
+  // Schedules auto-logout based on the token's exp claim whenever the token changes.
+  useEffect(() => {
+    clearExpiryTimer();
+
+    if (!token) return;
+
+    const expiryMs = getTokenExpiryMs(token);
+    if (expiryMs === null) return;
+
+    const msUntilExpiry = expiryMs - Date.now();
+
+    if (msUntilExpiry <= 0) {
+      handleTokenExpiry();
+      return;
+    }
+
+    expiryTimerRef.current = setTimeout(() => {
+      handleTokenExpiry();
+    }, msUntilExpiry);
+
+    return clearExpiryTimer;
+  }, [token, clearExpiryTimer, handleTokenExpiry]);
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
@@ -57,6 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(null);
       setUser(null);
       setProfile(null);
+      setIsLoggedIn(false);
     });
   }, []);
 
@@ -106,6 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(accessToken);
     setUser(authUser || null);
     setProfile(profileRes);
+    setIsLoggedIn(true);
   };
 
   const register = async (data: RegisterData) => {
@@ -116,10 +190,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (token) {
       try { await apiLogout(token); } catch { /* ignore */ }
     }
+    clearExpiryTimer();
     await Promise.all([clearStoredToken(), clearStoredUser()]);
     setToken(null);
     setUser(null);
     setProfile(null);
+    setIsLoggedIn(false);
   };
 
   const refreshProfile = async () => {
@@ -133,6 +209,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         profile,
         isLoading,
+        isLoggedIn,
         login,
         register,
         logout,

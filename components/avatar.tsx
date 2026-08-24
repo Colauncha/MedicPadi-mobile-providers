@@ -1,5 +1,5 @@
 import { GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Colors as colors } from "../constants/theme";
+import { Colors as colors } from "../theme/tokens";
 
 // Define the interface for the component props
 interface AvatarProps {
