@@ -1,13 +1,21 @@
 // import { Tabs } from 'expo-router';
-import React from 'react';
+import { storage } from '@/utils/storage';
+import { router, Stack } from 'expo-router';
+import React, { useEffect } from 'react';
 
-// import { HapticTab } from '@/components/haptic-tab';
-// import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Stack } from 'expo-router';
-// import { ThemedView } from '@/components/themed-view';
+const ONBOARDING_KEY = 'mp_onboarding_done';
+
 
 export default function AuthLayout() {
-  // const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    (async () => {
+      const firstTimer = await storage.getItem(ONBOARDING_KEY)
+      if(Boolean(parseInt(firstTimer ?? '0', 10))) 
+        router.replace('/login')
+  })()
+  }, [])
+
 
   return (
       <Stack>

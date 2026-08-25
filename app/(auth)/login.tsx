@@ -64,6 +64,7 @@ export const Login = () => {
       forgotText: {
         fontFamily: theme.typography.fonts?.sans,
         fontSize: theme.typography.sizes.sm,
+        marginTop: theme.spacing.base,
         color: theme.colors.primary.deep,
       },
       btn: { width: '100%' },

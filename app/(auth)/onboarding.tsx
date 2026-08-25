@@ -3,8 +3,8 @@ import { ThemedView } from '@/components/themed-view'
 import { Button } from '@/components/ui/Button'
 import { IconSymbol } from '@/components/ui/icon-symbol'
 import { useThemedStyles } from '@/hooks/useThemedStyle'
+import { storage } from '@/utils/storage'
 import { router } from 'expo-router'
-import * as SecureStore from 'expo-secure-store'
 import { useRef, useState } from 'react'
 // import Link
 import { Dimensions, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
@@ -42,7 +42,7 @@ const Onboarding = () => {
   const scrollRef = useRef<ScrollView>(null);
 
   const markSeenAndGo = () => {
-    SecureStore.setItemAsync(ONBOARDING_KEY, '1').catch(() => {});
+    storage.setItem(ONBOARDING_KEY, '1').catch(() => {});
     router.replace('/usertype')
   };
 
