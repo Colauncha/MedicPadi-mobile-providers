@@ -6,7 +6,16 @@ import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const Login = () => {
@@ -25,20 +34,28 @@ export const Login = () => {
     try {
       await login(email, password);
     } catch (e: any) {
-      Alert.alert('Login failed', e.message ?? 'Invalid credentials. Please try again.');
+      Alert.alert(
+        'Login failed',
+        e.message ?? 'Invalid credentials. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoBack = () => {
-    router.back()
-  }
+    router.back();
+  };
 
-  const styles = useThemedStyles((theme) => 
+  const styles = useThemedStyles((theme) =>
     StyleSheet.create({
       container: { flex: 1, backgroundColor: theme.colors.background },
-      scroll: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: theme.spacing.base },
+      scroll: {
+        flexGrow: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: theme.spacing.base,
+      },
       card: {
         backgroundColor: theme.colors.surfaceCard,
         borderRadius: theme.radius.xl,
@@ -48,7 +65,12 @@ export const Login = () => {
         width: '100%',
         maxWidth: 360,
       },
-      header: { marginBottom: theme.spacing.xl },
+      header: {
+        marginBottom: theme.spacing.xl,
+        paddingBottom: theme.spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.border,
+      },
       title: {
         fontFamily: theme.typography.fonts?.sans,
         fontSize: theme.typography.sizes.xl,
@@ -84,22 +106,22 @@ export const Login = () => {
         fontSize: theme.typography.sizes.md,
         color: theme.colors.primary.extraDeep,
       },
-        goBack: {
-          flex: 1,
-          flexDirection: 'row',
-          gap: 2,
-          alignItems: 'center',
-          marginBottom: theme.spacing.base,
-        },
-        goBackIcon: {
-          color: theme.colors.textMuted
-        },
-        goBackText: {
-          color: theme.colors.textMuted,
-          fontSize: theme.typography.sizes.sm
-        }
+      goBack: {
+        flex: 1,
+        flexDirection: 'row',
+        gap: 2,
+        alignItems: 'center',
+        marginBottom: theme.spacing.base,
+      },
+      goBackIcon: {
+        color: theme.colors.textMuted,
+      },
+      goBackText: {
+        color: theme.colors.textMuted,
+        fontSize: theme.typography.sizes.sm,
+      },
     })
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -107,15 +129,26 @@ export const Login = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.card}>
             <TouchableOpacity onPress={handleGoBack} style={styles.goBack}>
-              <IconSymbol name='chevron.left' style={styles.goBackIcon} size={12} />
-              <ThemedText type='subtitle' style={styles.goBackText}>Go Back</ThemedText>
+              <IconSymbol
+                name="chevron.left"
+                style={styles.goBackIcon}
+                size={12}
+              />
+              <ThemedText type="subtitle" style={styles.goBackText}>
+                Go Back
+              </ThemedText>
             </TouchableOpacity>
             <View style={styles.header}>
               <Text style={styles.title}>Welcome Back</Text>
-              <Text style={styles.subtitle}>Log in today and enjoy seamless operations</Text>
+              <Text style={styles.subtitle}>
+                Log in today and enjoy seamless operations
+              </Text>
             </View>
             <Input
               label="Email Address"
@@ -133,12 +166,22 @@ export const Login = () => {
               value={password}
               onChangeText={setPassword}
             />
-            <Button label="Log in" onPress={handleLogin} loading={loading} style={styles.btn} />
-            <TouchableOpacity style={styles.forgotRow} onPress={() => {}}>
+            <Button
+              label="Log in"
+              onPress={handleLogin}
+              loading={loading}
+              style={styles.btn}
+            />
+            <TouchableOpacity
+              style={styles.forgotRow}
+              onPress={() => router.push('/forgotpassword')}
+            >
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
             <View style={styles.signupRow}>
-              <Text style={styles.signupText}>Don&apos;t have an existing account? </Text>
+              <Text style={styles.signupText}>
+                Don&apos;t have an existing account?{' '}
+              </Text>
               <TouchableOpacity onPress={() => router.push('/register')}>
                 <Text style={styles.signupLink}>Sign up</Text>
               </TouchableOpacity>
@@ -150,4 +193,4 @@ export const Login = () => {
   );
 };
 
-export default Login
+export default Login;

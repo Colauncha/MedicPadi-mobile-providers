@@ -16,7 +16,9 @@ interface InputProps extends TextInputProps {
   hint?: string;
   error?: string;
   rightIcon?: React.ReactNode;
+  leftIcon?: React.ReactNode;
   showPasswordToggle?: boolean;
+  disabled?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -24,8 +26,10 @@ export const Input: React.FC<InputProps> = ({
   hint,
   error,
   rightIcon,
+  leftIcon,
   showPasswordToggle = false,
   secureTextEntry,
+  disabled,
   style,
   ...props
 }) => {
@@ -87,11 +91,14 @@ export const Input: React.FC<InputProps> = ({
     <View style={styles.wrapper}>
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={[styles.container, error ? styles.containerError : null]}>
+        {leftIcon && <View style={styles.icon}>{leftIcon}</View>}
         <TextInput
           style={[styles.input, style]}
           placeholderTextColor={appTheme.colors.textMuted}
           secureTextEntry={isSecure}
           {...props}
+          editable={!disabled}
+          selectTextOnFocus={!disabled}
         />
         {showPasswordToggle && (
           <TouchableOpacity onPress={() => setIsSecure(!isSecure)} style={styles.icon}>

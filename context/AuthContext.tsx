@@ -1,3 +1,4 @@
+import { storage } from '@/utils/storage';
 import React, {
   ReactNode,
   createContext,
@@ -39,6 +40,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const IS_LOGGED_IN = 'isLoggedIn';
+
 export const useAuth = (): AuthContextType => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
@@ -53,7 +56,10 @@ function getTokenExpiryMs(token: string): number | null {
     if (!payloadSegment) return null;
 
     const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      '='
+    );
 
     const jsonPayload = decodeURIComponent(
       atob(padded)
@@ -135,18 +141,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const hydrateAuth = useCallback(async () => {
     try {
-      const [tok, usr] = await Promise.all([getStoredToken(), getStoredUser()]);
+      const [tok, usr, isLogged] = await Promise.all([
+        getStoredToken(),
+        getStoredUser(),
+        storage.getItem(IS_LOGGED_IN),
+      ]);
       if (tok) {
         setToken(tok);
         if (usr) setUser(usr);
         await fetchProfile(tok);
+        setIsLoggedIn(JSON.parse(isLogged || 'false'));
       }
     } catch {
       // silently ignore — user will need to log in
     } finally {
       setIsLoading(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     hydrateAuth();
@@ -172,10 +183,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     const res = await apiLogin(email, password);
     const accessToken = res.token.access_token;
+
+    // TODO: If user === 'patient' redirect them to a 'download the patient app page'
+
     // Fetch profile once; derive authUser from login response or embedded profile.rest
     const profileRes = await apiGetProfile(accessToken);
     const authUser: AuthUser | undefined = res.user ?? profileRes?.rest;
-    await Promise.all([storeToken(accessToken), storeUser(authUser || null)]);
+    await Promise.all([
+      storeToken(accessToken),
+      storeUser(authUser || null),
+      storage.setItem(IS_LOGGED_IN, JSON.stringify(true)),
+    ]);
     setToken(accessToken);
     setUser(authUser || null);
     setProfile(profileRes);
@@ -188,10 +206,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     if (token) {
-      try { await apiLogout(token); } catch { /* ignore */ }
+      try {
+        await apiLogout(token);
+      } catch {
+        /* ignore */
+      }
     }
     clearExpiryTimer();
-    await Promise.all([clearStoredToken(), clearStoredUser()]);
+    await Promise.all([
+      clearStoredToken(),
+      clearStoredUser(),
+      storage.deleteItem(IS_LOGGED_IN),
+    ]);
     setToken(null);
     setUser(null);
     setProfile(null);

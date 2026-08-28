@@ -6,7 +6,9 @@ import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
 // type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconMapping = Partial<Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>>;
+type IconMapping = Partial<
+  Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>
+>;
 
 export type IconSymbolName = keyof typeof MAPPING;
 
@@ -21,23 +23,29 @@ const MAPPING = {
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
   'chevron.left': 'chevron-left',
+  'chevron.up?': 'chevron-up',
+  'chevron.down?': 'chevron-down',
 
-    // ⬇️ New Additions ⬇️
+  // ⬇️ New Additions ⬇️
   'gearshape.fill': 'settings',
   'person.fill': 'person',
   'person.2.fill': 'group',
   'bell.fill': 'notifications',
-  'magnifyingglass': 'search',
-  'plus': 'add',
+  magnifyingglass: 'search',
+  plus: 'add',
   'trash.fill': 'delete',
   'exclamationmark.triangle.fill': 'warning',
   'heart.fill': 'favorite',
   'lock.fill': 'lock',
+  'mail.fill': 'mail',
+  'mail.stack.fill': 'mark-email-unread',
+  'phone.and.waveform.fill': 'phone-android',
+  'calendar.badge.plus': 'calendar-view-month',
 
   // Medical related
-  'stethoscope': 'medical-services', // Doctor (Stethoscope on iOS -> Medical Briefcase on Android)
-  'pill.fill': 'local-pharmacy',     // Pharmacy (Pill Capsule on iOS -> Cross Capsule on Android)
-  'flask.fill': 'science', 
+  stethoscope: 'medical-services', // Doctor (Stethoscope on iOS -> Medical Briefcase on Android)
+  'pill.fill': 'local-pharmacy', // Pharmacy (Pill Capsule on iOS -> Cross Capsule on Android)
+  'flask.fill': 'science',
 } as IconMapping;
 
 /**
@@ -57,5 +65,12 @@ export function IconSymbol({
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  return (
+    <MaterialIcons
+      color={color}
+      size={size}
+      name={MAPPING[name]}
+      style={style}
+    />
+  );
 }

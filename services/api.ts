@@ -26,7 +26,9 @@ export const clearStoredUser = () => storage.deleteItem(USER_KEY);
 // ── Unauthorized callback (registered by AuthContext) ─────────────────────────
 
 let _onUnauthorized: (() => void) | null = null;
-export const setUnauthorizedHandler = (cb: () => void) => { _onUnauthorized = cb; };
+export const setUnauthorizedHandler = (cb: () => void) => {
+  _onUnauthorized = cb;
+};
 
 // ── HTTP helper ───────────────────────────────────────────────────────────────
 
@@ -41,9 +43,11 @@ async function request<T>(
   method: string,
   path: string,
   body?: unknown,
-  token?: string | null,
+  token?: string | null
 ): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -75,7 +79,7 @@ export interface AuthUser {
 }
 
 export interface LoginResponse {
-  token: {access_token: string};
+  token: { access_token: string };
   message: string;
   user?: AuthUser;
 }
@@ -214,8 +218,8 @@ export interface TransactionVerifyResponse {
       source_type: string;
       source_id: string;
       provider_id: string;
-    }
-  }
+    };
+  };
 }
 
 export interface DrugData {
@@ -257,8 +261,14 @@ export interface EHRRecord {
 
 export interface Paginated<T> {
   data: T[];
-  links: {first: string, last: string, next: string, previous: string}; 
-  meta: {count: number, limit: number, page: number, total: number, total_pages: number}
+  links: { first: string; last: string; next: string; previous: string };
+  meta: {
+    count: number;
+    limit: number;
+    page: number;
+    total: number;
+    total_pages: number;
+  };
 }
 
 export enum ReviewProfileType {
@@ -288,35 +298,61 @@ export const apiLogout = (token: string) =>
   request<void>('GET', '/auth/logout', undefined, token);
 
 export const apiRequestPasswordReset = (email: string) =>
-  request<void>('POST', '/auth/request-password-reset', { email });
+  request<{ message: string }>(
+    'POST',
+    `/auth/request-password-reset?email=${encodeURIComponent(email)}`,
+    { email }
+  );
+
+export const apiResetPassword = (
+  email: string,
+  otp: number,
+  newPassword: string
+) =>
+  request<{ message: string }>('POST', `/auth/reset-password`, {
+    email,
+    otp,
+    newPassword,
+  });
 
 export const apiSendVerificationEmail = (token: string) =>
   request<void>('POST', '/auth/send-verification-mail', undefined, token);
 
 export const apiVerifyEmail = (id: string, otp: string, token: string) =>
-  request<void>('GET', `/auth/verify-email?id=${encodeURIComponent(id)}&token=${encodeURIComponent(otp)}`, undefined, token);
+  request<void>(
+    'GET',
+    `/auth/verify-email?id=${encodeURIComponent(id)}&token=${encodeURIComponent(otp)}`,
+    undefined,
+    token
+  );
 
 // ── Profile ───────────────────────────────────────────────────────────────────
 
 export const apiGetProfile = (token: string) =>
   request<ProfileData>('GET', '/profile/retrieve', undefined, token);
 
-export const apiCreateProfile = (data: Record<string, unknown>, token: string) =>
-  request<ProfileData>('POST', '/profile', data, token);
+export const apiCreateProfile = (
+  data: Record<string, unknown>,
+  token: string
+) => request<ProfileData>('POST', '/profile', data, token);
 
 export const apiUpdateProfile = (data: ProfileUpdateData, token: string) =>
   request<ProfileData>('PATCH', '/profile', data, token);
 
 export const apiUploadProfilePicture = async (
   imageUri: string,
-  token: string,
+  token: string
 ): Promise<ProfileData> => {
   const filename = imageUri.split('/').pop() ?? 'photo.jpg';
   const match = /\.(\w+)$/.exec(filename);
   const type = match ? `image/${match[1]}` : 'image/jpeg';
 
   const formData = new FormData();
-  formData.append('profilePicture', { uri: imageUri, name: filename, type } as any);
+  formData.append('profilePicture', {
+    uri: imageUri,
+    name: filename,
+    type,
+  } as any);
 
   const res = await fetch(`${BASE_URL}/profile`, {
     method: 'PATCH',
@@ -335,43 +371,40 @@ export const apiUploadProfilePicture = async (
 export const apiGetProfileById = (
   id: string,
   role: 'consultant' | 'lab' | 'pharmacy' | 'patient',
-  token: string,
+  token: string
 ) =>
   request<ProfileData>('GET', `/profile/${id}?role=${role}`, undefined, token);
 
 export const apiListProfiles = (
   params: Record<string, string | number> = {},
-  token: string,
+  token: string
 ) =>
   request<Paginated<ProfileFields>>(
     'GET',
     `/profile${toQS(params)}`,
     undefined,
-    token,
+    token
   );
 
 // ── Appointments ──────────────────────────────────────────────────────────────
 
 export const apiGetAppointments = (
   params: Record<string, string | number> = {},
-  token: string,
+  token: string
 ) =>
   request<Paginated<AppointmentData>>(
     'GET',
     `/orders/appointments${toQS(params)}`,
     undefined,
-    token,
+    token
   );
 
-export const apiGetOneAppointment = (
-  id: string,
-  token: string,
-) =>
+export const apiGetOneAppointment = (id: string, token: string) =>
   request<AppointmentData | PaymentLinkAppointmentData>(
     'GET',
     `/orders/appointments/${id}`,
     undefined,
-    token,
+    token
   );
 
 export interface ZoomSignatureResponse {
@@ -403,13 +436,13 @@ export const apiBookAppointment = (
     sessionCost?: number;
     sessions?: number;
   },
-  token: string,
+  token: string
 ) => request<AppointmentData>('POST', '/orders/appointments', data, token);
 
 export const apiUpdateAppointment = (
   id: string,
   data: Partial<AppointmentData>,
-  token: string,
+  token: string
 ) =>
   request<AppointmentData>('PATCH', `/orders/appointments/${id}`, data, token);
 
@@ -417,19 +450,24 @@ export const apiCancelAppointment = (id: string, token: string) =>
   request<void>('DELETE', `/orders/appointments/${id}`, undefined, token);
 
 export const apiGetDoctorAppointments = (doctorId: string, token: string) =>
-  request<{ data: AppointmentData[] }>('GET', `/orders/appointment?id=${doctorId}`, undefined, token);
+  request<{ data: AppointmentData[] }>(
+    'GET',
+    `/orders/appointment?id=${doctorId}`,
+    undefined,
+    token
+  );
 
 // ── Pharmacy Drugs ────────────────────────────────────────────────────────────
 
 export const apiGetDrugs = (
   params: Record<string, string | number> = {},
-  token: string,
+  token: string
 ) =>
   request<Paginated<DrugData>>(
     'GET',
     `/services/pharmacy/drugs${toQS(params)}`,
     undefined,
-    token,
+    token
   );
 
 export const apiGetDrugById = (id: string, token: string) =>
@@ -439,39 +477,39 @@ export const apiGetDrugById = (id: string, token: string) =>
 
 export const apiGetLabTests = (
   params: Record<string, string | number> = {},
-  token: string,
+  token: string
 ) =>
   request<Paginated<LabTestData>>(
     'GET',
     `/services/lab/tests${toQS(params)}`,
     undefined,
-    token,
+    token
   );
 
 // ── EHR Records ───────────────────────────────────────────────────────────────
 
 export const apiGetEHRRecords = (
   params: Record<string, string | number> = {},
-  token: string,
+  token: string
 ) =>
   request<Paginated<EHRRecord>>(
     'GET',
     `/ehr/records${toQS(params)}`,
     undefined,
-    token,
+    token
   );
 
 // ── Test Requisitions ─────────────────────────────────────────────────────────
 
 export const apiGetTestRequisitions = (
   params: Record<string, string | number> = {},
-  token: string,
+  token: string
 ) =>
   request<Paginated<Record<string, unknown>>>(
     'GET',
     `/orders/test-requisitions${toQS(params)}`,
     undefined,
-    token,
+    token
   );
 
 // ── Drug Requisitions ─────────────────────────────────────────────────────────
@@ -483,20 +521,20 @@ export const apiCreateDrugRequisition = (
     delivery_address?: string;
     notes?: string;
   },
-  token: string,
+  token: string
 ) => request<unknown>('POST', '/orders/drug-requisitions', data, token);
 
 // ── Transactions ─────────────────────────────────────────────────────────
 
-export const apiVerifyTransaction = (
-  reference: string,
-  token: string,
-) => request<TransactionVerifyResponse>('GET', `/transactions/verify/${reference}`, undefined, token)
+export const apiVerifyTransaction = (reference: string, token: string) =>
+  request<TransactionVerifyResponse>(
+    'GET',
+    `/transactions/verify/${reference}`,
+    undefined,
+    token
+  );
 
 // ── Reviews ─────────────────────────────────────────────────────────
 
-export const apiSubmitReview = (
-  id: string,
-  data: ReviewResponseData,
-  token: string,
-) => request<ReviewResponseData>('GET', `/profile/reviews/${id}`, data, token);
+export const apiSubmitReview = (id: string, data: ReviewResponseData, token: string) =>
+  request<ReviewResponseData>('GET', `/profile/reviews/${id}`, data, token);
