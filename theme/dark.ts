@@ -1,5 +1,5 @@
 // theme/dark.ts
-import { palette, radius, spacing, typography } from './tokens';
+import { palette, radius, shadowsDark, spacing, typography } from './tokens';
 import { Theme } from './types';
 
 export const darkTheme: Theme = {
@@ -30,8 +30,27 @@ export const darkTheme: Theme = {
       deep: palette.purple.deep,
       extraDeep: palette.purple.extraDeep,
     },
+    mono: {
+      light: palette.mono.light,
+      lightGray: palette.mono.lightGray,
+      gray: palette.mono.gray,
+      darkGray: palette.mono.darkGray,
+      dark: palette.mono.dark,
+    },
+    blue: {
+      bg: palette.blue.bg,
+      base: palette.blue.base,
+      mid: palette.blue.mid,
+      deep: palette.blue.deep,
+      extraDeep: palette.blue.extraDeep,
+    },
+  },
+  shadows: {
+    mild: shadowsDark.mild,
+    base: shadowsDark.base,
+    heavy: shadowsDark.heavy,
   },
   spacing,
   radius,
   typography,
-}; 
+};

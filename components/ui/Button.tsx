@@ -10,7 +10,6 @@ import {
   ViewStyle,
 } from 'react-native';
 
-
 interface ButtonProps {
   label: string;
   onPress: () => void;
@@ -32,67 +31,67 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
 }) => {
-
   // const {colors} = useColorSchemeMode()
-  const { theme: appTheme } = useTheme()
+  const { theme: appTheme } = useTheme();
 
-  const styles = useThemedStyles((theme) => 
+  const styles = useThemedStyles((theme) =>
     StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: theme.radius.md,
-  },
-  primary: {
-    backgroundColor: theme.colors.primary.extraDeep,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: theme.colors.primary.extraDeep,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  size_sm: {
-    height: 32,
-    paddingHorizontal: theme.spacing.md,
-  },
-  size_md: {
-    height: 40,
-    paddingHorizontal: theme.spacing.base,
-  },
-  size_lg: {
-    height: 48,
-    paddingHorizontal: theme.spacing.xl,
-  },
-  text: {
-    fontFamily: theme.typography.fonts?.sans,
-    fontSize: theme.typography.sizes.base,
-  },
-  text_primary: {
-    color: theme.colors.buttonText,
-  },
-  text_outline: {
-    color: theme.colors.primary.extraDeep,
-  },
-  text_ghost: {
-    color: theme.colors.primary.extraDeep,
-  },
-  textSize_sm: {
-    fontSize: theme.typography.sizes.sm,
-  },
-  textSize_md: {
-    fontSize: theme.typography.sizes.base,
-  },
-  textSize_lg: {
-    fontSize: theme.typography.sizes.lg,
-  },
-}))
+      base: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: theme.radius.md,
+      },
+      primary: {
+        backgroundColor: theme.colors.primary.extraDeep,
+      },
+      outline: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: theme.colors.primary.extraDeep,
+      },
+      ghost: {
+        backgroundColor: 'transparent',
+      },
+      disabled: {
+        opacity: 0.5,
+      },
+      size_sm: {
+        height: 32,
+        paddingHorizontal: theme.spacing.md,
+      },
+      size_md: {
+        height: 40,
+        paddingHorizontal: theme.spacing.base,
+      },
+      size_lg: {
+        height: 48,
+        paddingHorizontal: theme.spacing.xl,
+      },
+      text: {
+        fontFamily: theme.typography.fonts?.sans,
+        fontSize: theme.typography.sizes.base,
+      },
+      text_primary: {
+        color: theme.colors.buttonText,
+      },
+      text_outline: {
+        color: theme.colors.primary.extraDeep,
+      },
+      text_ghost: {
+        color: theme.colors.primary.extraDeep,
+      },
+      textSize_sm: {
+        fontSize: theme.typography.sizes.sm,
+      },
+      textSize_md: {
+        fontSize: theme.typography.sizes.base,
+      },
+      textSize_lg: {
+        fontSize: theme.typography.sizes.lg,
+      },
+    })
+  );
 
   const containerStyle = [
     styles.base,
@@ -110,9 +109,22 @@ export const Button: React.FC<ButtonProps> = ({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? appTheme.colors.text : appTheme.colors.primary.extraDeep} />
+        <ActivityIndicator
+          color={
+            variant === 'primary'
+              ? appTheme.colors.primary.shallow
+              : appTheme.colors.primary.extraDeep
+          }
+        />
       ) : (
-        <Text style={[styles.text, styles[`text_${variant}`], styles[`textSize_${size}`], textStyle]}>
+        <Text
+          style={[
+            styles.text,
+            styles[`text_${variant}`],
+            styles[`textSize_${size}`],
+            textStyle,
+          ]}
+        >
           {label}
         </Text>
       )}

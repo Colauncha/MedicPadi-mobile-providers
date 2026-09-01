@@ -23,7 +23,6 @@ const FRESH_REGISTRATION = 'fresh_registration';
 
 const Register = () => {
   const { usertype: userType } = useLocalSearchParams();
-  // const [usersType, setUsersType] = useState(userType);
   const { register } = useAuth();
   const [form, setForm] = useState({
     firstName: '',

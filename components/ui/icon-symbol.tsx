@@ -18,7 +18,7 @@ export type IconSymbolName = keyof typeof MAPPING;
  * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
 const MAPPING = {
-  'house.fill': 'home',
+  // 'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
@@ -27,10 +27,11 @@ const MAPPING = {
   'chevron.down?': 'chevron-down',
 
   // ⬇️ New Additions ⬇️
-  'gearshape.fill': 'settings',
-  'person.fill': 'person',
+  // 'gearshape.fill': 'settings',
+  // 'person.fill': 'person',
   'person.2.fill': 'group',
   'bell.fill': 'notifications',
+  'arrow.down.to.line': 'download',
   magnifyingglass: 'search',
   plus: 'add',
   'trash.fill': 'delete',
@@ -40,12 +41,19 @@ const MAPPING = {
   'mail.fill': 'mail',
   'mail.stack.fill': 'mark-email-unread',
   'phone.and.waveform.fill': 'phone-android',
-  'calendar.badge.plus': 'calendar-view-month',
+  'bell.badge.fill': 'notifications-active',
+  'arrow.up.right': 'north-east',
 
   // Medical related
   stethoscope: 'medical-services', // Doctor (Stethoscope on iOS -> Medical Briefcase on Android)
   'pill.fill': 'local-pharmacy', // Pharmacy (Pill Capsule on iOS -> Cross Capsule on Android)
   'flask.fill': 'science',
+
+  // Tabs
+  'house.fill': 'home',
+  'gearshape.fill': 'settings',
+  'person.fill': 'person',
+  'calendar.badge.plus': 'calendar-view-month',
 } as IconMapping;
 
 /**

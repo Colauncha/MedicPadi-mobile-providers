@@ -9,6 +9,13 @@ const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
 export const palette = {
+  mono: {
+    light: '#f4f4f7',
+    lightGray: '#d1d1d6',
+    gray: '#898990',
+    darkGray: '#5c5c63',
+    dark: '#1a1a1a',
+  },
   // light
   light: {
     tint: tintColorLight,
@@ -27,7 +34,7 @@ export const palette = {
       muted: '#b0b0b0',
     },
     buttonText: '#fcfcfc',
-    border: '#e7e7e7',
+    border: '#c8c8c8',
     white: '#ffffff',
     gold: '#ffd888',
     primary: {
@@ -78,6 +85,7 @@ export const palette = {
   green: '#47a052',
 
   blue: {
+    bg: '#d5d9ff',
     base: '#dbeafe',
     mid: '#60a5fa',
     deep: '#1e40af',
@@ -97,6 +105,18 @@ export const spacing = {
   lg: 20,
   xl: 24,
   xxl: 32,
+};
+
+export const shadowsLight = {
+  mild: '0px 2px 10px 0px rgba(100, 100, 100, 0.1)',
+  base: '0px 2px 30px 0px rgba(100, 100, 100, 0.1)',
+  heavy: '0px 2px 30px 0px rgba(50, 50, 50, 0.2)',
+};
+
+export const shadowsDark = {
+  mild: '0px 2px 10px 0px rgba(120, 120, 120, 0.1)',
+  base: '0px 2px 30px 0px rgba(120, 120, 120, 0.1)',
+  heavy: '0px 2px 30px 0px rgba(152, 152, 151, 0.2)',
 };
 
 export const radius = {
@@ -143,8 +163,9 @@ export const typography = {
     web: {
       sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       serif: "Georgia, 'Times New Roman', serif",
-      rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
+      rounded:
+        "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
       mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
     },
   }),
-}
+};

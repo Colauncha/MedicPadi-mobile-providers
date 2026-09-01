@@ -1,13 +1,19 @@
-import { ThemedText } from '@/components/themed-text'
-import { ThemedView } from '@/components/themed-view'
-import { Button } from '@/components/ui/Button'
-import { IconSymbol } from '@/components/ui/icon-symbol'
-import { useThemedStyles } from '@/hooks/useThemedStyle'
-import { storage } from '@/utils/storage'
-import { router } from 'expo-router'
-import { useRef, useState } from 'react'
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Button } from '@/components/ui/Button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useThemedStyles } from '@/hooks/useThemedStyle';
+import { storage } from '@/utils/storage';
+import { router } from 'expo-router';
+import { useRef, useState } from 'react';
 // import Link
-import { Dimensions, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -19,20 +25,23 @@ const images = {
   splash1: require('../../assets/images/1st_splash.png'),
   splash2: require('../../assets/images/2nd_splash.png'),
   splash3: require('../../assets/images/3rd_splash.png'),
-}
+};
 
 const slides = [
   {
     title: 'Your Health, Anytime, Anywhere',
-    subtitle: 'Connect instantly with certified doctors from the comfort of your home.',
+    subtitle:
+      'Connect instantly with certified doctors from the comfort of your home.',
   },
   {
     title: 'Talk to Medical Professionals',
-    subtitle: 'Book physical, or chat consultations with licensed doctors across multiple specialties.',
+    subtitle:
+      'Book physical, or chat consultations with licensed doctors across multiple specialties.',
   },
   {
     title: 'Care That Never Sleeps',
-    subtitle: 'Our doctors are available around the clock to provide guidance whenever you need it.',
+    subtitle:
+      'Our doctors are available around the clock to provide guidance whenever you need it.',
   },
 ];
 const ONBOARDING_KEY = 'mp_onboarding_done';
@@ -43,7 +52,7 @@ const Onboarding = () => {
 
   const markSeenAndGo = () => {
     storage.setItem(ONBOARDING_KEY, '1').catch(() => {});
-    router.replace('/usertype')
+    router.replace('/usertype');
   };
 
   const handleNext = () => {
@@ -191,6 +200,7 @@ const Onboarding = () => {
             <ThemedView style={styles.imagePlaceholder}>
               <Image
                 source={images[`splash${idx + 1}` as keyof typeof images]}
+                fadeDuration={0}
                 style={styles.image}
                 resizeMode="cover"
               />
@@ -201,13 +211,20 @@ const Onboarding = () => {
 
       <ThemedView style={styles.bottom}>
         <ThemedView style={styles.content}>
-          <ThemedText style={styles.title}>{slides[currentIndex].title}</ThemedText>
-          <ThemedText style={styles.subtitle}>{slides[currentIndex].subtitle}</ThemedText>
+          <ThemedText style={styles.title}>
+            {slides[currentIndex].title}
+          </ThemedText>
+          <ThemedText style={styles.subtitle}>
+            {slides[currentIndex].subtitle}
+          </ThemedText>
         </ThemedView>
 
         <ThemedView style={styles.dotsRow}>
           {slides.map((_, idx) => (
-            <ThemedView key={idx} style={[styles.dot, idx === currentIndex && styles.dotActive]} />
+            <ThemedView
+              key={idx}
+              style={[styles.dot, idx === currentIndex && styles.dotActive]}
+            />
           ))}
         </ThemedView>
 
@@ -219,7 +236,7 @@ const Onboarding = () => {
         />
       </ThemedView>
     </ThemedView>
-  )
-}
+  );
+};
 
-export default Onboarding
+export default Onboarding;

@@ -1,5 +1,4 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
@@ -9,20 +8,21 @@ import { useAuth } from '@/context/AuthContext';
 import { Link } from 'expo-router';
 
 export default function HomeScreen() {
-  const { logout } = useAuth();
-
-  const handleLogout = async () => {
-    await logout();
-  };
+  const { user } = useAuth();
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
+      // headerImage={
+      //   <Image
+      //     source={require('@/assets/images/partial-react-logo.png')}
+      //     style={styles.reactLogo}
+      //   />
+      // }
+      headerElement={
+        <ThemedText type="title">
+          Welcome! {user?.fullName || 'User'}
+        </ThemedText>
       }
     >
       <ThemedView style={styles.titleContainer}>
@@ -89,11 +89,6 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <TouchableOpacity onPress={handleLogout}>
-          <ThemedText type="defaultSemiBold">logout</ThemedText>.
-        </TouchableOpacity>
       </ThemedView>
     </ParallaxScrollView>
   );

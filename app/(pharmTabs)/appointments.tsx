@@ -9,7 +9,7 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
 
-export default function Settings() {
+export default function Appointments() {
   const styles = useThemedStyles((theme) =>
     StyleSheet.create({
       headerImage: {

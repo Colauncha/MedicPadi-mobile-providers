@@ -1,5 +1,5 @@
 // theme/light.ts
-import { palette, radius, spacing, typography } from './tokens';
+import { palette, radius, shadowsLight, spacing, typography } from './tokens';
 import { Theme } from './types';
 
 export const lightTheme: Theme = {
@@ -9,7 +9,7 @@ export const lightTheme: Theme = {
     surface: palette.light.surface,
     surfaceCard: palette.light.card,
     surfaceCardLight: palette.light.cardLight,
-    surfaceCardBlue: palette.light.cardBlue,
+    surfaceCardBlue: palette.blue.deep,
     text: palette.light.text.primary,
     buttonText: palette.light.buttonText,
     textSecondary: palette.light.text.medium,
@@ -30,6 +30,25 @@ export const lightTheme: Theme = {
       deep: palette.purple.deep,
       extraDeep: palette.purple.extraDeep,
     },
+    mono: {
+      light: palette.mono.light,
+      lightGray: palette.mono.lightGray,
+      gray: palette.mono.gray,
+      darkGray: palette.mono.darkGray,
+      dark: palette.mono.dark,
+    },
+    blue: {
+      bg: palette.blue.bg,
+      base: palette.blue.base,
+      mid: palette.blue.mid,
+      deep: palette.blue.deep,
+      extraDeep: palette.blue.extraDeep,
+    },
+  },
+  shadows: {
+    mild: shadowsLight.mild,
+    base: shadowsLight.base,
+    heavy: shadowsLight.heavy,
   },
   spacing,
   radius,

@@ -12,22 +12,24 @@ import { useTheme } from '@/theme/ThemeProvider';
 // import { useColorScheme } from '@/hooks/use-color-scheme';
 // import { useThemeColor } from '@/hooks/use-theme-color';
 
-const HEADER_HEIGHT = 250;
+const HEADER_HEIGHT = 450;
 
 type Props = PropsWithChildren<{
-  headerImage: ReactElement;
+  headerImage?: ReactElement;
+  headerElement?: ReactElement;
   headerBackgroundColor: { dark: string; light: string };
 }>;
 
 export default function ParallaxScrollView({
   children,
   headerImage,
+  headerElement,
   headerBackgroundColor,
 }: Props) {
-    const {theme} = useTheme();
+  const { theme } = useTheme();
 
-  const backgroundColor = theme.colors.background //useThemeColor({}, 'background');
-  const colorScheme = theme.mode //useColorScheme() ?? 'light';
+  const backgroundColor = theme.colors.background; //useThemeColor({}, 'background');
+  const colorScheme = theme.mode; //useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
   const headerAnimatedStyle = useAnimatedStyle(() => {
@@ -41,7 +43,11 @@ export default function ParallaxScrollView({
           ),
         },
         {
-          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
+          scale: interpolate(
+            scrollOffset.value,
+            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
+            [2, 1, 1]
+          ),
         },
       ],
     };
@@ -51,14 +57,17 @@ export default function ParallaxScrollView({
     <Animated.ScrollView
       ref={scrollRef}
       style={{ backgroundColor, flex: 1 }}
-      scrollEventThrottle={16}>
+      scrollEventThrottle={16}
+    >
       <Animated.View
         style={[
           styles.header,
           { backgroundColor: headerBackgroundColor[colorScheme] },
           headerAnimatedStyle,
-        ]}>
-        {headerImage}
+        ]}
+      >
+        {headerImage && headerImage}
+        {headerElement && headerElement}
       </Animated.View>
       <ThemedView style={styles.content}>{children}</ThemedView>
     </Animated.ScrollView>
@@ -78,5 +87,8 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 16,
     overflow: 'hidden',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginTop: -22,
   },
 });

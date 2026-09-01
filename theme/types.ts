@@ -12,11 +12,11 @@ export interface Theme {
     textMuted: string;
     buttonText: string;
     primary: {
-      shallow: string,
-      mid: string,
-      base: string,
-      deep: string,
-      extraDeep: string,
+      shallow: string;
+      mid: string;
+      base: string;
+      deep: string;
+      extraDeep: string;
     };
     border: string;
     danger: string;
@@ -26,7 +26,26 @@ export interface Theme {
       mid: string;
       deep: string;
       extraDeep: string;
-    }
+    };
+    mono: {
+      light: string;
+      lightGray: string;
+      gray: string;
+      darkGray: string;
+      dark: string;
+    };
+    blue: {
+      bg: string;
+      base: string;
+      mid: string;
+      deep: string;
+      extraDeep: string;
+    };
+  };
+  shadows: {
+    mild: string;
+    base: string;
+    heavy: string;
   };
   spacing: typeof import('./tokens').spacing;
   radius: typeof import('./tokens').radius;

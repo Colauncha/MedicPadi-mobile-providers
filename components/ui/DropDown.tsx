@@ -32,6 +32,8 @@ type DropDownProps = {
 
   disabled?: boolean;
 
+  borderless?: boolean;
+
   style?: StyleProp<ViewStyle>;
 };
 
@@ -41,6 +43,7 @@ function DropDown({
   defaultValue,
   onChange,
   placeholder = 'Select',
+  borderless = true,
   disabled,
   style,
 }: DropDownProps) {
@@ -96,7 +99,7 @@ function DropDown({
         alignItems: 'center',
         justifyContent: 'space-between',
 
-        borderWidth: 1,
+        borderWidth: borderless ? 0 : 1,
         borderColor: theme.colors.border,
         borderRadius: theme.radius.md,
 
