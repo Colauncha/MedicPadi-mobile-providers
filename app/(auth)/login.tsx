@@ -23,6 +23,7 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  // const { redirect } = useLocalSearchParams();
 
   const handleLogin = async () => {
     setLoading(true);
@@ -33,6 +34,7 @@ export const Login = () => {
     }
     try {
       await login(email, password);
+      // router.replace(redirect[0])
     } catch (e: any) {
       Alert.alert(
         'Login failed',

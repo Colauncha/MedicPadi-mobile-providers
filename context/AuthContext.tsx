@@ -1,5 +1,5 @@
 import { storage } from '@/utils/storage';
-import React, {
+import {
   ReactNode,
   createContext,
   useCallback,
@@ -95,7 +95,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleTokenExpiry = useCallback(async () => {
     clearExpiryTimer();
     try {
-      await Promise.all([clearStoredToken(), clearStoredUser()]);
+      await Promise.all([
+        clearStoredToken(),
+        clearStoredUser(),
+        storage.deleteItem(IS_LOGGED_IN),
+      ]);
     } catch {
       // ignore — state reset below still happens
     }
@@ -116,10 +120,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const msUntilExpiry = expiryMs - Date.now();
 
-    if (msUntilExpiry <= 0) {
-      handleTokenExpiry();
-      return;
-    }
+    // if (msUntilExpiry <= 0) {
+    //   handleTokenExpiry();
+    //   return;
+    // }
 
     expiryTimerRef.current = setTimeout(() => {
       handleTokenExpiry();
@@ -139,30 +143,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const hydrateAuth = useCallback(async () => {
-    try {
-      const [tok, usr, isLogged] = await Promise.all([
-        getStoredToken(),
-        getStoredUser(),
-        storage.getItem(IS_LOGGED_IN),
-      ]);
-      if (tok) {
-        setToken(tok);
-        if (usr) setUser(usr);
-        await fetchProfile(tok);
-        setIsLoggedIn(JSON.parse(isLogged || 'false'));
-      }
-    } catch {
-      // silently ignore — user will need to log in
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    hydrateAuth();
-  }, [hydrateAuth]);
-
   const fetchProfile = async (tok: string) => {
     try {
       const p = await apiGetProfile(tok);
@@ -179,6 +159,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setProfile(null);
     }
   };
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const [tok, usr, isLogged] = await Promise.all([
+          getStoredToken(),
+          getStoredUser(),
+          storage.getItem(IS_LOGGED_IN),
+        ]);
+
+        if (!mounted) return;
+
+        if (tok) {
+          setToken(tok);
+          if (usr) setUser(usr);
+          await fetchProfile(tok);
+          if (mounted) setIsLoggedIn(JSON.parse(isLogged || 'false'));
+        }
+      } catch {
+        // silently ignore — user will need to log in
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const login = async (email: string, password: string) => {
     const res = await apiLogin(email, password);

@@ -43,6 +43,10 @@ const MAPPING = {
   'phone.and.waveform.fill': 'phone-android',
   'bell.badge.fill': 'notifications-active',
   'arrow.up.right': 'north-east',
+  checkmark: 'check',
+  xmark: 'close',
+  camera: 'camera-alt',
+  'pencil.line': 'edit',
 
   // Medical related
   stethoscope: 'medical-services', // Doctor (Stethoscope on iOS -> Medical Briefcase on Android)

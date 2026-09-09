@@ -5,7 +5,7 @@ import { useThemedStyles } from '@/hooks/useThemedStyle';
 import { apiRequestPasswordReset, apiResetPassword } from '@/services/api';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Link, router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -39,10 +39,17 @@ const Forgotpasswordotp = () => {
   });
 
   // Only reveal the password fields once all OTP digits are filled in.
-  useEffect(() => {
-    const inputCount = digits.join('').length;
-    setShowPassInput(inputCount === OTP_LENGTH);
-  }, [digits]);
+  // useEffect(() => {
+  //   const inputCount = digits.join('').length;
+  //   setShowPassInput(inputCount === OTP_LENGTH);
+  // }, [digits]);
+
+  const inputCount = digits.join('').length;
+  if (inputCount === OTP_LENGTH) {
+    setShowPassInput(true);
+  } else {
+    setShowPassInput(false);
+  }
 
   const validatePassword = (password: string): string => {
     if (!password) return '';
@@ -367,6 +374,6 @@ const Forgotpasswordotp = () => {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-};
+};;
 
 export default Forgotpasswordotp;

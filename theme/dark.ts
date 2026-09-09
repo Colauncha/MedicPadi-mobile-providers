@@ -24,6 +24,10 @@ export const darkTheme: Theme = {
     border: palette.dark.border,
     danger: palette.danger,
     success: palette.green,
+    warning: palette.warning,
+    dangerBg: palette.dangerBg,
+    successBg: palette.successBg,
+    warningBg: palette.warningBg,
     purple: {
       base: palette.purple.base,
       mid: palette.purple.mid,

@@ -1,23 +1,19 @@
-import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { StyleSheet } from 'react-native';
 
-import { HapticTab } from '@/components/haptic-tab';
+import HapticTab from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/theme/ThemeProvider';
+import { Image } from 'expo-image';
 
 export const unstable_settings = {
   initialRouteName: 'index',
-  anchor: '(doctorsTabs)',
+  anchor: '(doctorTabs)',
 };
 
 export default function TabLayout() {
   const { theme } = useTheme();
-  const { user } = useAuth();
-
-  console.log('TabLayout user:', user);
+  const { profile } = useAuth();
 
   return (
     <Tabs
@@ -26,22 +22,15 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.colors.textMuted,
         tabBarStyle: {
           // display: 'none',
-          backgroundColor: 'transparent', //theme.colors.background,
-          borderTopWidth: 0,
+          backgroundColor: theme.colors.background, //theme.colors.background,
+          borderTopWidth: 1,
           borderTopColor: theme.colors.border,
           position: 'absolute',
         },
-        tabBarBackground: () => (
-          <BlurView
-            intensity={60}
-            tint={theme.mode === 'dark' ? 'dark' : 'light'}
-            experimentalBlurMethod="dimezisBlurView"
-            style={StyleSheet.absoluteFill}
-          />
-        ),
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          fontFamily: theme.typography.fonts?.rounded,
         },
         headerShown: false,
         tabBarButton: HapticTab,
@@ -70,17 +59,23 @@ export default function TabLayout() {
         options={{
           title: 'Patients',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.fill" color={color} />
+            <IconSymbol size={28} name="person.2.fill" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="(profile)"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="gearshape.fill" color={color} />
-          ),
+          title: 'Profile',
+          tabBarIcon: ({ color }) =>
+            profile?.profile.profilePicture?.url ? (
+              <Image
+                source={profile?.profile.profilePicture?.url}
+                style={{ width: 28, height: 28, borderRadius: 14 }}
+              />
+            ) : (
+              <IconSymbol size={28} name="person.fill" color={color} />
+            ),
         }}
       />
     </Tabs>

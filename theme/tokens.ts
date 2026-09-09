@@ -83,6 +83,7 @@ export const palette = {
   },
 
   green: '#47a052',
+  successBg: '#E6F7EC',
 
   blue: {
     bg: '#d5d9ff',
@@ -93,8 +94,10 @@ export const palette = {
   },
 
   warning: '#fa9e4d',
+  warningBg: '#FFF3E0',
 
   danger: '#e5334b',
+  dangerBg: '#FCE8EC',
 };
 
 export const spacing = {

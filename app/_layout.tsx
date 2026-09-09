@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
@@ -22,6 +22,8 @@ function RootLayoutNav() {
 
   const isInitializing = isAuthLoading || !hasCheckedRegistration;
   const isAuthenticated = isLoggedIn && token !== null;
+
+  const { theme } = useTheme();
 
   useEffect(() => {
     let mounted = true;
@@ -70,13 +72,17 @@ function RootLayoutNav() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
       {/* Authentication */}
       <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            contentStyle: { backgroundColor: theme.colors.background },
+            headerShown: false,
+          }}
+        />
       </Stack.Protected>
 
       {/* Fresh registration */}
@@ -86,7 +92,7 @@ function RootLayoutNav() {
           options={{
             presentation: 'modal',
             title: 'Complete Registration',
-            headerShown: true,
+            headerShown: false,
           }}
         />
       </Stack.Protected>
@@ -95,7 +101,13 @@ function RootLayoutNav() {
       <Stack.Protected
         guard={isAuthenticated && !!user && !isNewReg && user.role === 'lab'}
       >
-        <Stack.Screen name="(labTabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(labTabs)"
+          options={{
+            contentStyle: { backgroundColor: theme.colors.background },
+            headerShown: false,
+          }}
+        />
       </Stack.Protected>
 
       <Stack.Protected
@@ -103,7 +115,13 @@ function RootLayoutNav() {
           isAuthenticated && !!user && !isNewReg && user.role === 'pharmacy'
         }
       >
-        <Stack.Screen name="(pharmTabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(pharmTabs)"
+          options={{
+            contentStyle: { backgroundColor: theme.colors.background },
+            headerShown: false,
+          }}
+        />
       </Stack.Protected>
 
       <Stack.Protected
@@ -116,18 +134,21 @@ function RootLayoutNav() {
       >
         <Stack.Screen
           name="(doctorsTabs)"
-          options={{ headerShown: false, animation: 'slide_from_right' }}
+          options={{
+            contentStyle: { backgroundColor: theme.colors.background },
+            headerShown: false,
+          }}
         />
       </Stack.Protected>
 
       {/* Modal route */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name="modal"
         options={{
           presentation: 'modal',
           title: 'Modal',
         }}
-      />
+      /> */}
     </Stack>
   );
 }
@@ -139,13 +160,6 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
-  // useEffect(() => {
-  //   SplashScreen.setOptions({
-  //     duration: 300,
-  //     fade: true,
-  //   });
-  // }, [])
-
   return (
     <ThemeProvider>
       <AuthProvider>

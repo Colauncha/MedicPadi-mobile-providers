@@ -32,10 +32,26 @@ export const setUnauthorizedHandler = (cb: () => void) => {
 
 // ── HTTP helper ───────────────────────────────────────────────────────────────
 
-function toQS(params: Record<string, string | number>): string {
-  const pairs = Object.entries(params)
-    .filter(([, v]) => v != null && v !== '')
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+function toQS(params: Record<string, any>): string {
+  const pairs: string[] = [];
+
+  for (const [key, value] of Object.entries(params)) {
+    // Skip null, undefined, and empty strings
+    if (value == null || value === '') continue;
+
+    if (Array.isArray(value)) {
+      // Loop through array and repeat the key
+      value.forEach((item) => {
+        if (item != null && item !== '') {
+          pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
+        }
+      });
+    } else {
+      // Handle primitive values
+      pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+    }
+  }
+
   return pairs.length ? `?${pairs.join('&')}` : '';
 }
 
@@ -286,6 +302,45 @@ export interface ReviewResponseData {
   laboratory_id?: string | null;
 }
 
+export interface DoctorsSpecialityResponse {
+  general: string;
+  oncology: string;
+  cardiologists: string;
+  dermatologists: string;
+  endocrinologists: string;
+  neurologists: string;
+  psychiatrists: string;
+  radiologists: string;
+  pathologists: string;
+  others: string;
+}
+
+export interface DoctorStatsResponse {
+  totalPatients: number;
+  totalAppointments: number;
+  scheduledAppointments: number;
+  returningPatientPercent: number;
+  newPatientsThisWeek: number;
+  totalPatientsThisWeek: number;
+  weeklyChanges: {
+    totalPatients: {
+      currentWeek: number;
+      previousWeek: number;
+      percentChange: number | null;
+    };
+    totalAppointments: {
+      currentWeek: number;
+      previousWeek: number;
+      percentChange: number | null;
+    };
+    scheduledAppointments: {
+      currentWeek: number;
+      previousWeek: number;
+      percentChange: number | null;
+    };
+  };
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 export const apiRegister = (data: RegisterData) =>
@@ -376,12 +431,23 @@ export const apiGetProfileById = (
   request<ProfileData>('GET', `/profile/${id}?role=${role}`, undefined, token);
 
 export const apiListProfiles = (
-  params: Record<string, string | number> = {},
+  params: Record<
+    string,
+    string | number | string[] | number[] | undefined
+  > = {},
   token: string
 ) =>
   request<Paginated<ProfileFields>>(
     'GET',
     `/profile${toQS(params)}`,
+    undefined,
+    token
+  );
+
+export const fetchDoctorsSpeciality = (token: string) =>
+  request<DoctorsSpecialityResponse>(
+    'GET',
+    '/profile/doctors/speciality',
     undefined,
     token
   );
@@ -536,5 +602,13 @@ export const apiVerifyTransaction = (reference: string, token: string) =>
 
 // ── Reviews ─────────────────────────────────────────────────────────
 
-export const apiSubmitReview = (id: string, data: ReviewResponseData, token: string) =>
-  request<ReviewResponseData>('GET', `/profile/reviews/${id}`, data, token);
+export const apiSubmitReview = (
+  id: string,
+  data: ReviewResponseData,
+  token: string
+) => request<ReviewResponseData>('GET', `/profile/reviews/${id}`, data, token);
+
+// ── Stats ─────────────────────────────────────────────────────────
+
+export const apiGetDoctorStats = (token: string) =>
+  request<DoctorStatsResponse>('GET', '/orders/stats/doctor', undefined, token);

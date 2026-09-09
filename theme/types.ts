@@ -21,6 +21,10 @@ export interface Theme {
     border: string;
     danger: string;
     success: string;
+    warning: string;
+    dangerBg: string;
+    warningBg: string;
+    successBg: string;
     purple: {
       base: string;
       mid: string;
