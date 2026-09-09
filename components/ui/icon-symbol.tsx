@@ -47,6 +47,7 @@ const MAPPING = {
   xmark: 'close',
   camera: 'camera-alt',
   'pencil.line': 'edit',
+  'graduationcap.fill': 'school',
 
   // Medical related
   stethoscope: 'medical-services', // Doctor (Stethoscope on iOS -> Medical Briefcase on Android)

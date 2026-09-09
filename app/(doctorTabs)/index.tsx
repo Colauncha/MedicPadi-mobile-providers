@@ -167,7 +167,7 @@ const AppointmentRequestRow = ({
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: theme.spacing.md,
-        borderBottomWidth: 0.5,
+        // borderBottomWidth: 0.5,
         borderColor: theme.colors.mono.light,
       }}
     >
@@ -605,9 +605,10 @@ export default function HomeScreen() {
       content: {
         flexGrow: 1,
         width: '100%',
+        backgroundColor: theme.colors.surfaceCardLight,
         padding: theme.spacing.base,
         marginBottom: theme.spacing.base,
-        borderWidth: 1,
+        // borderWidth: 1,
         borderColor: theme.colors.border,
         borderRadius: theme.radius.lg,
         marginHorizontal: theme.spacing.base,
