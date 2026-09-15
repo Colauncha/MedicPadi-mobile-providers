@@ -3,7 +3,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { Stack } from 'expo-router';
 // import { StyleSheet } from 'react-native';
 
-export const ProfilePage = () => {
+export const PatientsPage = () => {
   // const styles = useThemedStyles((theme) => StyleSheet.create({}));
   const { theme } = useTheme();
 
@@ -13,13 +13,28 @@ export const ProfilePage = () => {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-      <Stack.Screen name="editProfile" options={{ headerShown: false }} />
       <Stack.Screen
-        name="settings"
+        name="index"
         options={{
           headerShown: true,
-          title: 'Settings',
+          title: 'Patients',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            color: theme.colors.textSecondary,
+            fontFamily: theme.typography.fonts?.rounded,
+            fontSize: theme.typography.sizes.xl,
+            fontWeight: 'bold',
+          },
+          headerStyle: {
+            backgroundColor: theme.colors.background,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="[id]"
+        options={{
+          headerShown: true,
+          title: 'Patient',
           headerTitleAlign: 'center',
           headerTitleStyle: {
             color: theme.colors.textSecondary,
@@ -36,4 +51,4 @@ export const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default PatientsPage;

@@ -1,4 +1,5 @@
 import { storage } from '@/utils/storage';
+import { File } from 'expo-file-system';
 // import { truncate } from '@/utils';
 
 const BASE_URL = 'https://api.medicpadi.com/api';
@@ -59,17 +60,26 @@ async function request<T>(
   method: string,
   path: string,
   body?: unknown,
-  token?: string | null
+  token?: string | null,
+  multipart?: boolean
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  let headers: Record<string, string> = {};
+
+  if (!multipart) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  let finalBody: BodyInit | undefined;
+  if (body !== undefined) {
+    finalBody = multipart ? (body as BodyInit) : JSON.stringify(body);
+  }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: finalBody,
   });
 
   const data = await res.json().catch(() => null);
@@ -394,33 +404,51 @@ export const apiCreateProfile = (
 export const apiUpdateProfile = (data: ProfileUpdateData, token: string) =>
   request<ProfileData>('PATCH', '/profile', data, token);
 
+// export const apiUploadProfilePicture = async (
+//   imageUri: string,
+//   token: string
+// ): Promise<ProfileData> => {
+//   const filename = imageUri.split('/').pop() ?? 'photo.jpg';
+//   const match = /\.(\w+)$/.exec(filename);
+//   const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+//   console.log('Image uri: ', imageUri);
+//   const formData = new FormData();
+//   formData.append('image', {
+//     uri: imageUri,
+//     name: filename,
+//     type,
+//   } as any);
+
+//   console.log('formData: ', formData);
+
+//   return request<ProfileData>(
+//     'POST',
+//     '/profile/profile-picture',
+//     formData,
+//     token,
+//     true
+//   );
+// };
+
 export const apiUploadProfilePicture = async (
   imageUri: string,
   token: string
 ): Promise<ProfileData> => {
-  const filename = imageUri.split('/').pop() ?? 'photo.jpg';
-  const match = /\.(\w+)$/.exec(filename);
-  const type = match ? `image/${match[1]}` : 'image/jpeg';
-
+  const file = new File(imageUri);
   const formData = new FormData();
-  formData.append('profilePicture', {
-    uri: imageUri,
-    name: filename,
-    type,
-  } as any);
 
-  const res = await fetch(`${BASE_URL}/profile`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  });
+  formData.append('image', file);
 
-  const data = await res.json().catch(() => null);
-  if (!res.ok) {
-    const msg = data?.message ?? `HTTP ${res.status}`;
-    throw new Error(Array.isArray(msg) ? msg.join(', ') : String(msg));
-  }
-  return data as ProfileData;
+  console.log('formData: ', formData);
+
+  return request<ProfileData>(
+    'POST',
+    '/profile/profile-picture',
+    formData,
+    token,
+    true
+  );
 };
 
 export const apiGetProfileById = (
@@ -452,10 +480,24 @@ export const fetchDoctorsSpeciality = (token: string) =>
     token
   );
 
+export const getDoctorsPatients = (
+  params: Record<
+    string,
+    string | number | string[] | number[] | undefined
+  > = {},
+  token: string
+) =>
+  request<Paginated<ProfileFields>>(
+    'GET',
+    `/orders/appointments/list/patients${toQS(params)}`,
+    undefined,
+    token
+  );
+
 // ── Appointments ──────────────────────────────────────────────────────────────
 
 export const apiGetAppointments = (
-  params: Record<string, string | number> = {},
+  params: Record<string, string | number | string[] | number[]> = {},
   token: string
 ) =>
   request<Paginated<AppointmentData>>(

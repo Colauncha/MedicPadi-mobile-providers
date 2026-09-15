@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import {
   Pressable,
   StyleProp,
   StyleSheet,
+  TextStyle,
   View,
   ViewStyle,
 } from 'react-native';
@@ -18,23 +19,31 @@ export type DropdownOption = {
 type DropdownProps = {
   value: string;
   placeholder?: string;
+  description?: string;
   options: DropdownOption[];
   onChange: (value: string) => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   style?: StyleProp<ViewStyle>;
+  mainTextStyle?: StyleProp<TextStyle>;
+  descriptionTextStyle?: StyleProp<TextStyle>;
   label?: string;
+  inLine?: boolean;
 };
 
 export function Dropdown({
   value,
   placeholder = 'Select an option',
+  description,
   options,
   onChange,
   isOpen,
   onOpenChange,
   style,
+  mainTextStyle,
+  descriptionTextStyle,
   label,
+  inLine = false,
 }: DropdownProps) {
   const containerRef = useRef<View>(null);
 
@@ -42,6 +51,17 @@ export function Dropdown({
     StyleSheet.create({
       container: {
         width: '100%',
+      },
+
+      inLineContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'relative',
+      },
+
+      labelContainer: {
+        flexDirection: 'column',
       },
 
       label: {
@@ -52,7 +72,7 @@ export function Dropdown({
       },
 
       trigger: {
-        width: '100%',
+        width: inLine ? '40%' : '100%',
         minHeight: 48,
         borderWidth: 1,
         borderColor: isOpen ? theme.colors.primary.deep : theme.colors.border,
@@ -66,6 +86,7 @@ export function Dropdown({
         fontFamily: theme.typography.fonts?.sans,
         fontSize: theme.typography.sizes.md,
         color: theme.colors.text,
+        textTransform: 'capitalize',
       },
 
       placeholder: {
@@ -79,6 +100,14 @@ export function Dropdown({
         borderRadius: theme.radius.md,
         backgroundColor: theme.colors.surfaceCard,
         overflow: 'hidden',
+        zIndex: 99,
+      },
+
+      inLineMenu: {
+        position: 'absolute',
+        right: 0,
+        top: 50,
+        zIndex: 99,
       },
 
       option: {
@@ -98,6 +127,7 @@ export function Dropdown({
         fontFamily: theme.typography.fonts?.sans,
         fontSize: theme.typography.sizes.md,
         color: theme.colors.text,
+        textTransform: 'capitalize',
       },
 
       selectedOption: {
@@ -119,8 +149,24 @@ export function Dropdown({
   };
 
   return (
-    <View ref={containerRef} style={[styles.container, style]}>
-      {label && <ThemedText style={styles.label}>{label}</ThemedText>}
+    <View
+      ref={containerRef}
+      style={[
+        styles.container,
+        ...[inLine ? styles.inLineContainer : {}],
+        style,
+      ]}
+    >
+      <View style={styles.labelContainer}>
+        {label && (
+          <ThemedText style={[styles.label, mainTextStyle]}>{label}</ThemedText>
+        )}
+        {description && (
+          <ThemedText style={[styles.label, descriptionTextStyle]}>
+            {description}
+          </ThemedText>
+        )}
+      </View>
 
       <Pressable style={styles.trigger} onPress={() => onOpenChange(!isOpen)}>
         <ThemedText
@@ -131,7 +177,7 @@ export function Dropdown({
       </Pressable>
 
       {isOpen && (
-        <View style={styles.menu}>
+        <View style={[styles.menu, ...[inLine ? styles.inLineMenu : {}]]}>
           {options.map((option, index) => {
             const selected = option.value === value;
 

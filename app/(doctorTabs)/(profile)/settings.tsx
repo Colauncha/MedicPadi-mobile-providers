@@ -12,21 +12,46 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import DropDown from '@/components/ui/DropDown';
+import { Dropdown as DD2, DropdownOption } from '@/components/ui/DropDown2';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import ToggleButton from '@/components/ui/ToggleButton';
 import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
+import { useTheme } from '@/theme/ThemeProvider';
 
 const TAB_BAR_HEIGHT = 80;
 
+const themeOptions: DropdownOption[] = [
+  {
+    value: 'system',
+    label: 'System',
+  },
+  {
+    value: 'light',
+    label: 'Light',
+  },
+  {
+    value: 'dark',
+    label: 'Dark',
+  },
+];
+
 export default function Settings() {
   const { logout } = useAuth();
+  const { mode, setMode } = useTheme();
 
   const [enable2Fa, setEnable2Fa] = useState(false);
   const [enablePushNotification, setEnablePushNotification] = useState(false);
   const [enableDesktopNotification, setEnableDesktopNotification] =
     useState(false);
   const [enableEmailNotification, setEnableEmailNotification] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState<'theme' | 'language' | null>(
+    null
+  );
+
+  const handleModeChange = (value: string) => {
+    setMode(value as typeof mode);
+  };
 
   const styles = useThemedStyles((theme) =>
     StyleSheet.create({
@@ -38,7 +63,7 @@ export default function Settings() {
       scroll: {
         flexGrow: 1,
         paddingHorizontal: theme.spacing.base,
-        paddingTop: theme.spacing.xxl + 50,
+        paddingTop: theme.spacing.xl,
 
         // Important:
         // The tab bar is absolute, so the scroll content needs
@@ -163,12 +188,16 @@ export default function Settings() {
   const isWindows = Platform.OS === 'windows';
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {/* <TouchableOpacity>
+
+        </TouchableOpacity> */}
+
         {/* Settings */}
         <ThemedView style={styles.optionsContainer}>
           {/* Language */}
@@ -185,6 +214,31 @@ export default function Settings() {
               data={[{ id: 'eng', label: 'English' }]}
               placeholder="English"
               disabled
+            />
+          </View>
+
+          {/* Theme */}
+          <View style={styles.options}>
+            <DD2
+              label="Theme"
+              value={mode}
+              placeholder="Select theme"
+              description="Select your prefered theme"
+              mainTextStyle={styles.optionsMainText}
+              descriptionTextStyle={styles.optionsSubText}
+              options={themeOptions}
+              isOpen={openDropdown === 'theme'}
+              onOpenChange={(open) => setOpenDropdown(open ? 'theme' : null)}
+              onChange={(value) => {
+                handleModeChange(value);
+                setOpenDropdown(null);
+              }}
+              inLine
+              // style={{
+              //   // flexDirection: 'row',
+              //   alignItems: 'center',
+              //   justifyContent: 'space-between',
+              // }}
             />
           </View>
 

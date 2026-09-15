@@ -41,7 +41,7 @@ const genderOptions: DropdownOption[] = [
   },
 ];
 
-type ConsultantFormValues = {
+export type ConsultantFormValues = {
   firstName: string;
   lastName: string;
   gender: string;
@@ -207,12 +207,13 @@ export default function EditConsultantProfileScreen() {
       return;
     }
 
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
-  };
+    // if (router.canGoBack()) {
+    //   router.back();
+    // } else {
+    //   router.replace('/');
+    // }
+    router.replace('/profile');
+  };;
 
   /*
    * Convert form values into the API payload.
@@ -262,8 +263,6 @@ export default function EditConsultantProfileScreen() {
 
       const payload = removeUnsetFields(formatFields(formValues));
 
-      console.log('Updating consultant profile:', payload);
-
       /*
        * Update profile information first.
        */
@@ -298,6 +297,35 @@ export default function EditConsultantProfileScreen() {
     }
   };
 
+  const handleUploadPic = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    if (!token) {
+      Alert.alert(
+        'Authentication error',
+        'Your session has expired. Please log in again.'
+      );
+      return;
+    }
+
+    if (!pickedImageUri) return;
+
+    try {
+      setIsSubmitting(true);
+      const resp = await apiUploadProfilePicture(pickedImageUri, token);
+      if (resp) {
+        Alert.alert('Profile photo uploaded successfully');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Unable to update profile', `${error}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handlePickImage = async () => {
     if (isSubmitting) {
       return;
@@ -316,7 +344,6 @@ export default function EditConsultantProfileScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -357,11 +384,11 @@ export default function EditConsultantProfileScreen() {
       },
 
       card: {
-        backgroundColor: theme.colors.surfaceCard,
+        // backgroundColor: theme.colors.surfaceCard,
         borderRadius: theme.radius.xl,
         borderColor: theme.colors.border,
         borderWidth: 0,
-        padding: theme.spacing.lg,
+        // padding: theme.spacing.lg,
         width: '100%',
         maxWidth: 500,
       },
@@ -543,9 +570,18 @@ export default function EditConsultantProfileScreen() {
                   </View>
                 </TouchableOpacity>
 
-                <ThemedText style={styles.changePhotoText}>
-                  Tap to change photo
-                </ThemedText>
+                {pickedImageUri ? (
+                  <Button
+                    label="Save"
+                    onPress={handleUploadPic}
+                    style={{ height: 30 }}
+                    loading={isSubmitting}
+                  />
+                ) : (
+                  <ThemedText style={styles.changePhotoText}>
+                    Tap to change photo
+                  </ThemedText>
+                )}
               </View>
             </View>
 
@@ -690,7 +726,7 @@ export default function EditConsultantProfileScreen() {
 
             {/* Cost per session */}
             <View style={styles.fieldContainer}>
-              <ThemedText style={styles.label}>Cost Per Session</ThemedText>
+              <ThemedText style={styles.label}>Cost Per Session (₦)</ThemedText>
 
               <TextInput
                 value={formValues.costPerSession}
@@ -706,7 +742,9 @@ export default function EditConsultantProfileScreen() {
 
             {/* Session length */}
             <View style={styles.fieldContainer}>
-              <ThemedText style={styles.label}>Session Length</ThemedText>
+              <ThemedText style={styles.label}>
+                Session Length (minutes)
+              </ThemedText>
 
               <TextInput
                 value={formValues.sessionLength}

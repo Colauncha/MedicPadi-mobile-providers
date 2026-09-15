@@ -31,25 +31,12 @@ const Forgotpasswordotp = () => {
   const [confirmNewpassword, setConfirmNewPassword] = useState('');
   const inputs = useRef<(TextInput | null)[]>([]);
 
-  const [showPassInput, setShowPassInput] = useState(false);
+  const showPassInput = digits.join('').length === OTP_LENGTH;
   const [errors, setErrors] = useState({
     newPassError: '',
     confirmNewPassError: '',
     apiError: '',
   });
-
-  // Only reveal the password fields once all OTP digits are filled in.
-  // useEffect(() => {
-  //   const inputCount = digits.join('').length;
-  //   setShowPassInput(inputCount === OTP_LENGTH);
-  // }, [digits]);
-
-  const inputCount = digits.join('').length;
-  if (inputCount === OTP_LENGTH) {
-    setShowPassInput(true);
-  } else {
-    setShowPassInput(false);
-  }
 
   const validatePassword = (password: string): string => {
     if (!password) return '';
@@ -374,6 +361,6 @@ const Forgotpasswordotp = () => {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-};;
+};
 
 export default Forgotpasswordotp;

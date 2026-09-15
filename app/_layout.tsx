@@ -1,5 +1,10 @@
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
-import { Stack } from 'expo-router';
+import {
+  DarkTheme,
+  DefaultTheme,
+  Stack,
+  ThemeProvider as TP,
+} from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
@@ -7,6 +12,7 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { storage } from '@/utils/storage';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { useColorScheme } from 'react-native';
 
 // export const unstable_settings = {
 //   anchor: '(tabs)',
@@ -160,12 +166,16 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
+
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <RootLayoutNav />
-        <StatusBar style="auto" />
-      </AuthProvider>
-    </ThemeProvider>
+    <TP value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider>
+        <AuthProvider>
+          <RootLayoutNav />
+          <StatusBar style="auto" />
+        </AuthProvider>
+      </ThemeProvider>
+    </TP>
   );
 }

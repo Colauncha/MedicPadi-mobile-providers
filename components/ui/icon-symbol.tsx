@@ -48,6 +48,7 @@ const MAPPING = {
   camera: 'camera-alt',
   'pencil.line': 'edit',
   'graduationcap.fill': 'school',
+  'door.left.hand.open': 'exit-to-app',
 
   // Medical related
   stethoscope: 'medical-services', // Doctor (Stethoscope on iOS -> Medical Briefcase on Android)

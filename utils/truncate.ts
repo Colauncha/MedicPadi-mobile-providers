@@ -23,4 +23,4 @@ const truncate = (input: string, len: number = 15): string => {
   } else return input;
 };
 
-export { truncateEmail, truncate };
+export { truncate, truncateEmail };
