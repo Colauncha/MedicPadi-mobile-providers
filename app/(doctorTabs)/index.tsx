@@ -9,6 +9,10 @@ import {
   View,
 } from 'react-native';
 
+import {
+  AppointmentCard,
+  AppointmentRequestRow,
+} from '@/components/appointmentCards/AppointmentCards';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -26,267 +30,10 @@ import {
 } from '@/services/api';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Theme } from '@/theme/types';
-import { formatDate, formatTime } from '@/utils/formatter';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 
 const MedicpadiLogo = require('../../assets/images/medicpadi-logo.png');
-
-// ---------- Status badge helpers ----------
-
-type AppointmentStatus =
-  | 'confirmed'
-  | 'pending'
-  | 'cancelled'
-  | 'canceled'
-  | string;
-
-const getStatusStyle = (theme: Theme, status: AppointmentStatus) => {
-  const normalized = status?.toLowerCase();
-  switch (normalized) {
-    case 'confirmed':
-      return {
-        backgroundColor: theme.colors.successBg ?? '#E6F7EC',
-        color: theme.colors.success ?? '#1E8E3E',
-        label: 'Confirmed',
-      };
-    case 'pending':
-      return {
-        backgroundColor: theme.colors.warningBg ?? '#FFF3E0',
-        color: theme.colors.warning ?? '#E08A00',
-        label: 'Pending',
-      };
-    case 'cancelled':
-    case 'canceled':
-      return {
-        backgroundColor: theme.colors.dangerBg ?? '#FCE8EC',
-        color: theme.colors.danger ?? '#D6336C',
-        label: 'Canceled',
-      };
-    default:
-      return {
-        backgroundColor: theme.colors.mono.light,
-        color: theme.colors.mono.darkGray,
-        label: status ?? '',
-      };
-  }
-};
-
-const AppointmentCard = ({
-  appointment,
-  patient,
-  theme,
-}: {
-  appointment: AppointmentData;
-  patient?: ProfileFields;
-  theme: Theme;
-}) => {
-  const badge = getStatusStyle(theme, appointment.status);
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      style={
-        {
-          /* ...unchanged... */
-        }
-      }
-      onPress={() => router.push(`/appointments/${appointment.id}` as any)}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: theme.spacing.sm,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: theme.typography.sizes.sm,
-            color: theme.colors.text,
-          }}
-        >
-          {formatTime(appointment.appointment_time)}
-        </Text>
-        <View
-          style={{
-            paddingHorizontal: theme.spacing.sm,
-            paddingVertical: 2,
-            borderRadius: theme.radius.full,
-            backgroundColor: badge.backgroundColor,
-          }}
-        >
-          <Text
-            style={{ fontSize: theme.typography.sizes.xs, color: badge.color }}
-          >
-            {badge.label}
-          </Text>
-        </View>
-      </View>
-      <ThemedText
-        style={{
-          fontSize: theme.typography.sizes.md,
-          color: theme.colors.text,
-        }}
-        type="defaultSemiBold"
-      >
-        {appointment.description}
-      </ThemedText>
-      <Text
-        style={{
-          fontSize: theme.typography.sizes.sm,
-          color: theme.colors.textMuted,
-          marginTop: 2,
-        }}
-      >
-        {patient?.firstName ?? 'Unknown patient'}
-      </Text>
-    </TouchableOpacity>
-  );
-};
-
-// ---------- Appointment request row ----------
-
-const AppointmentRequestRow = ({
-  appointment,
-  patient,
-  theme,
-  onAccept,
-  onDecline,
-}: {
-  appointment: AppointmentData;
-  patient?: ProfileFields;
-  theme: Theme;
-  onAccept: (id: string) => void;
-  onDecline: (id: string) => void;
-}) => {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: theme.spacing.md,
-        // borderBottomWidth: 0.5,
-        borderColor: theme.colors.mono.light,
-      }}
-    >
-      {patient?.profilePicture?.url ? (
-        <Image
-          source={{ uri: patient.profilePicture.url }}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: theme.radius.full,
-            marginRight: theme.spacing.sm,
-          }}
-          contentFit="cover"
-        />
-      ) : (
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: theme.radius.full,
-            backgroundColor: theme.colors.mono.light,
-            marginRight: theme.spacing.sm,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <IconSymbol
-            name="person.fill"
-            size={18}
-            color={theme.colors.mono.darkGray}
-          />
-        </View>
-      )}
-
-      <View style={{ flex: 1 }}>
-        <ThemedText
-          style={{
-            fontSize: theme.typography.sizes.md,
-            color: theme.colors.text,
-          }}
-          type="defaultSemiBold"
-        >
-          {patient?.firstName ?? 'Unknown patient'}
-        </ThemedText>
-        <Text
-          style={{
-            fontSize: theme.typography.sizes.sm,
-            color: theme.colors.textMuted,
-          }}
-        >
-          {appointment.description}
-        </Text>
-        <Text
-          style={{
-            fontSize: theme.typography.sizes.sm,
-            color: theme.colors.textMuted,
-            marginTop: 2,
-          }}
-        >
-          {formatDate(appointment.appointment_time)},{' '}
-          {formatTime(appointment.appointment_time)}
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.push(`/appointments/${appointment.id}` as any)}
-        >
-          <Text
-            style={{
-              fontSize: theme.typography.sizes.sm,
-              color: theme.colors.purple.extraDeep,
-              marginTop: 4,
-              textDecorationLine: 'underline',
-            }}
-          >
-            View details
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <TouchableOpacity
-          onPress={() => onAccept(appointment.id)}
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: theme.radius.full,
-            borderWidth: 1,
-            borderColor: theme.colors.success ?? '#1E8E3E',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <IconSymbol
-            name="checkmark"
-            size={14}
-            color={theme.colors.success ?? '#1E8E3E'}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => onDecline(appointment.id)}
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: theme.radius.full,
-            borderWidth: 1,
-            borderColor: theme.colors.danger ?? '#D6336C',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <IconSymbol
-            name="xmark"
-            size={14}
-            color={theme.colors.danger ?? '#D6336C'}
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
 
 // ---------- Header ----------
 
@@ -377,25 +124,25 @@ const DashboardHeaderElement = ({
       value: String(stats?.totalPatients || '0'),
       label: 'Total Patients',
       icon: 'arrow.up.right',
-      to: '',
+      to: '/patients',
     },
     {
       value: `${String(stats?.returningPatientPercent || '0')} `,
       label: 'Active Patients (%)',
       icon: 'arrow.up.right',
-      to: '',
+      to: '/patients',
     },
     {
       value: String(stats?.totalAppointments || '0'),
       label: 'Appointments',
       icon: 'arrow.up.right',
-      to: '',
+      to: '/appointments',
     },
     {
       value: `${String(profile?.profile.rating || '0.0')}`,
       label: 'Rating',
       icon: 'arrow.up.right',
-      to: '',
+      to: '/profile',
     },
   ];
 

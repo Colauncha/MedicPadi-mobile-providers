@@ -503,6 +503,8 @@
 
 import AvatarFromString from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
+import { Button } from '@/components/ui/Button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
 import {
@@ -513,7 +515,7 @@ import {
 } from '@/services/api';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Theme } from '@/theme/types';
-import { getAge } from '@/utils/formatter';
+import { formatDateWeekday, formatTime, getAge } from '@/utils/formatter';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -654,6 +656,7 @@ const DetailsTab = ({
           borderBottomWidth: 1,
           borderColor: theme.colors.border,
           paddingBottom: theme.spacing.sm,
+          position: 'relative',
         },
 
         listHeaderText: {
@@ -668,6 +671,67 @@ const DetailsTab = ({
           marginTop: 2,
           color: theme.colors.textMuted,
           fontSize: theme.typography.sizes.sm,
+        },
+
+        statusBox: {
+          borderRadius: theme.radius.lg,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.xs / 2,
+          position: 'absolute',
+          right: 0,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+
+        statusText: {
+          fontWeight: '800',
+          fontFamily: theme.typography.fonts?.mono,
+          fontSize: theme.typography.sizes.sm,
+          textTransform: 'capitalize',
+        },
+
+        listContent: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          paddingVertical: theme.spacing.lg,
+        },
+
+        listContentIcon: {
+          padding: theme.spacing.md,
+          borderRadius: theme.radius.full,
+          backgroundColor: theme.colors.surfaceCard,
+        },
+
+        listSubContent: {
+          flexDirection: 'row',
+          width: '45%',
+          alignItems: 'center',
+          gap: theme.spacing.sm,
+        },
+
+        listButtons: {
+          flexDirection: 'row',
+          width: '100%',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        },
+
+        listContentText: {
+          flexGrow: 1,
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+        },
+
+        listContentSubText: {
+          marginTop: 1,
+          color: theme.colors.textMuted,
+          fontSize: theme.typography.sizes.sm,
+        },
+
+        listButton: {
+          width: '45%',
         },
       }),
     [theme]
@@ -709,11 +773,103 @@ const DetailsTab = ({
                 {appointmentType}
               </ThemedText>
             </View>
+
+            <View
+              style={[
+                styles.statusBox,
+                ...[
+                  item.status === 'confirmed'
+                    ? {
+                        backgroundColor: theme.colors.blue.base,
+                      }
+                    : item.status === 'completed'
+                      ? {
+                          backgroundColor: theme.colors.successBg,
+                        }
+                      : item.status === 'pending'
+                        ? {
+                            backgroundColor: theme.colors.warningBg,
+                          }
+                        : {
+                            backgroundColor: theme.colors.dangerBg,
+                          },
+                ],
+              ]}
+            >
+              <ThemedText
+                style={[
+                  styles.statusText,
+                  ...[
+                    item.status === 'confirmed'
+                      ? {
+                          color: theme.colors.blue.extraDeep,
+                        }
+                      : item.status === 'completed'
+                        ? {
+                            color: theme.colors.success,
+                          }
+                        : item.status === 'pending'
+                          ? {
+                              color: theme.colors.warning,
+                            }
+                          : {
+                              color: theme.colors.danger,
+                            },
+                  ],
+                ]}
+              >
+                {item.status}
+              </ThemedText>
+            </View>
+          </View>
+          <View style={styles.listContent}>
+            <View style={styles.listSubContent}>
+              <IconSymbol
+                name={'calendar.badge'}
+                size={25}
+                style={styles.listContentIcon}
+                color={theme.colors.primary.extraDeep}
+              />
+              <View style={styles.listContentText}>
+                <ThemedText>Date</ThemedText>
+                <ThemedText style={styles.listContentSubText}>
+                  {formatDateWeekday(item.appointment_time, true, true)}
+                </ThemedText>
+              </View>
+            </View>
+            <View style={styles.listSubContent}>
+              <IconSymbol
+                name={'clock.badge.fill'}
+                size={25}
+                style={styles.listContentIcon}
+                color={theme.colors.primary.extraDeep}
+              />
+              <View style={styles.listContentText}>
+                <ThemedText>Time</ThemedText>
+                <ThemedText style={styles.listContentSubText}>
+                  {formatTime(item.appointment_time)}
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+          <View style={styles.listButtons}>
+            <Button
+              label="View Details"
+              variant="outline"
+              onPress={() => {}}
+              style={styles.listButton}
+            />
+            <Button
+              label="Consult Again"
+              variant="primary"
+              onPress={() => {}}
+              style={styles.listButton}
+            />
           </View>
         </View>
       );
     },
-    [patient, patientName, styles]
+    [patient, patientName, styles, theme]
   );
 
   return (

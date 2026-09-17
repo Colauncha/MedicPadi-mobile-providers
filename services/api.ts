@@ -497,7 +497,10 @@ export const getDoctorsPatients = (
 // ── Appointments ──────────────────────────────────────────────────────────────
 
 export const apiGetAppointments = (
-  params: Record<string, string | number | string[] | number[]> = {},
+  params: Record<
+    string,
+    string | number | string[] | number[] | undefined
+  > = {},
   token: string
 ) =>
   request<Paginated<AppointmentData>>(

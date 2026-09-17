@@ -36,12 +36,38 @@ export const formatTimeAdv = (
   return `${String(normalizedHour).padStart(2, '0')}:00`;
 };
 
-export const formatDate = (isoString: string) => {
+export const formatDate = (isoString: string, showYear: boolean = false) => {
   try {
     return new Date(isoString).toLocaleDateString(undefined, {
       day: '2-digit',
       month: 'long',
+      year: showYear ? '2-digit' : undefined,
     });
+  } catch {
+    return '';
+  }
+};
+
+export const formatDateWeekday = (
+  isoString: string,
+  showYear: boolean = false,
+  format_: boolean = true
+) => {
+  try {
+    const date = new Date(isoString);
+
+    const format = new Intl.DateTimeFormat(undefined, {
+      day: '2-digit',
+      month: 'long',
+      year: showYear ? '2-digit' : undefined,
+      weekday: 'long',
+    });
+    if (!format_) return format.format();
+
+    const parts = format.formatToParts(date);
+    const partMap = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+
+    return `${partMap.weekday}, ${partMap.day} ${partMap.month}`;
   } catch {
     return '';
   }
