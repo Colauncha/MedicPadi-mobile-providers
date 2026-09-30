@@ -9,60 +9,30 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { storage } from '@/utils/storage';
+import { handleNotificationNavigation } from '@/utils/notificationNavigation';
+import { getRole } from '@/utils/roles';
+import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 // export const unstable_settings = {
 //   anchor: '(tabs)',
 // };
 
-const FRESH_REGISTRATION = 'fresh_registration';
-
 function RootLayoutNav() {
-  const { isLoggedIn, token, isLoading: isAuthLoading, user } = useAuth();
+  const {
+    isLoggedIn,
+    token,
+    isLoading: isInitializing,
+    user,
+    isNewReg,
+  } = useAuth();
 
-  const [isNewReg, setIsNewReg] = useState(false);
-  const [hasCheckedRegistration, setHasCheckedRegistration] = useState(false);
-
-  const isInitializing = isAuthLoading || !hasCheckedRegistration;
   const isAuthenticated = isLoggedIn && token !== null;
+  const role = getRole(user?.role);
 
   const { theme } = useTheme();
-
-  useEffect(() => {
-    let mounted = true;
-
-    const checkFreshRegistration = async () => {
-      try {
-        const storedValue = await storage.getItem(FRESH_REGISTRATION);
-
-        const freshRegistration = storedValue === '1';
-
-        if (mounted) {
-          setIsNewReg(freshRegistration);
-          setHasCheckedRegistration(true);
-        }
-
-        // Consume the flag so it only applies once.
-        // await storage.deleteItem(FRESH_REGISTRATION);
-      } catch (error) {
-        console.error('Failed to check fresh registration:', error);
-
-        if (mounted) {
-          setIsNewReg(false);
-          setHasCheckedRegistration(true);
-        }
-      }
-    };
-
-    checkFreshRegistration();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (!isInitializing) {
@@ -105,7 +75,7 @@ function RootLayoutNav() {
 
       {/* Normal authenticated flow */}
       <Stack.Protected
-        guard={isAuthenticated && !!user && !isNewReg && user.role === 'lab'}
+        guard={isAuthenticated && !!user && !isNewReg && role === 'lab'}
       >
         <Stack.Screen
           name="(labTabs)"
@@ -118,7 +88,7 @@ function RootLayoutNav() {
 
       <Stack.Protected
         guard={
-          isAuthenticated && !!user && !isNewReg && user.role === 'pharmacy'
+          isAuthenticated && !!user && !isNewReg && role === 'pharmacy'
         }
       >
         <Stack.Screen
@@ -135,26 +105,17 @@ function RootLayoutNav() {
           isAuthenticated &&
           !!user &&
           !isNewReg &&
-          (user.role === 'doctor' || !user.role)
+          (role === 'consultant' || !user.role)
         }
       >
         <Stack.Screen
-          name="(doctorsTabs)"
+          name="(doctorTabs)"
           options={{
             contentStyle: { backgroundColor: theme.colors.background },
             headerShown: false,
           }}
         />
       </Stack.Protected>
-
-      {/* Modal route */}
-      {/* <Stack.Screen
-        name="modal"
-        options={{
-          presentation: 'modal',
-          title: 'Modal',
-        }}
-      /> */}
     </Stack>
   );
 }
@@ -167,6 +128,18 @@ SplashScreen.setOptions({
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data;
+
+        handleNotificationNavigation(data || {});
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
 
   return (
     <TP value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

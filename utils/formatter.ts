@@ -58,9 +58,9 @@ export const formatDateWeekday = (
 
     const format = new Intl.DateTimeFormat(undefined, {
       day: '2-digit',
-      month: 'long',
+      month: 'short',
       year: showYear ? '2-digit' : undefined,
-      weekday: 'long',
+      weekday: 'short',
     });
     if (!format_) return format.format();
 

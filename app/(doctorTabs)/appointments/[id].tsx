@@ -1,3 +1,4 @@
+import { AppHeader } from '@/components/ui/AppHeader';
 import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
@@ -6,6 +7,7 @@ import {
   AppointmentData,
   PaymentLinkAppointmentData,
   ProfileFields,
+  apiAcceptAppointment,
   apiGetOneAppointment,
   apiGetProfileById,
 } from '@/services/api';
@@ -13,10 +15,12 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { Theme } from '@/theme/types';
 import { truncate } from '@/utils';
 import { getAge } from '@/utils/formatter';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -98,6 +102,9 @@ const getPaymentStatusStyle = (
   }
 };
 
+// The doctor can start the call this long before the appointment time.
+const EARLY_START_MS = 15 * 60 * 1000;
+
 const BookingDetailsScreen = () => {
   const { token, user, profile } = useAuth();
 
@@ -111,44 +118,129 @@ const BookingDetailsScreen = () => {
     AppointmentData | PaymentLinkAppointmentData | null
   >(null);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [banner, setBanner] = useState<Record<string, any> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const { theme: appTheme } = useTheme();
 
-  useEffect(() => {
+  const [accepting, setAccepting] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  const fetchAppointment = useCallback(async () => {
     if (!doctorId || !token) {
       return;
     }
 
-    apiGetOneAppointment(bookingId as string, token)
-      .then((res) => {
-        setAppt(res);
-        apiGetProfileById(res.patient_id, 'patient', token)
-          .then((res) => setPatient(res.profile))
-          .catch((e) => setError(e.message ?? 'Failed to load profile'));
-        setBanner(bannerConfig(res.status, appTheme));
-      })
-      .catch((e) => setError(e.message ?? 'Failed to load appointment'))
-      .finally(() => setLoading(false));
+    try {
+      const res = await apiGetOneAppointment(bookingId as string, token);
+      setAppt(res);
+      setBanner(bannerConfig(res.status, appTheme));
+      apiGetProfileById(res.patient_id, 'patient', token)
+        .then((res) => setPatient(res.profile))
+        .catch((e) => setError(e.message ?? 'Failed to load profile'));
+    } catch (e: any) {
+      setError(e.message ?? 'Failed to load appointment');
+    }
   }, [doctorId, token, bookingId, appTheme]);
+
+  /*
+   * Refetch whenever the screen regains focus, e.g. after returning from
+   * a call, so the status and actions are up to date.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      if (!doctorId || !token) {
+        return;
+      }
+      fetchAppointment().finally(() => setLoading(false));
+    }, [doctorId, token, fetchAppointment])
+  );
 
   const handleReload = () => {
     setLoading(true);
     setError(null);
-    if (doctorId && token) {
-      apiGetOneAppointment(bookingId as string, token)
-        .then((res) => {
-          setAppt(res);
-          apiGetProfileById(res.patient_id, 'patient', token)
-            .then((res) => setPatient(res.profile))
-            .catch((e) => setError(e.message ?? 'Failed to load profile'));
-          setBanner(bannerConfig(res.status, appTheme));
-        })
-        .catch((e) => setError(e.message ?? 'Failed to load appointment'))
-        .finally(() => setLoading(false));
+    fetchAppointment().finally(() => setLoading(false));
+  };
+
+  const callOpensAt = appt?.appointment_time
+    ? new Date(appt.appointment_time).getTime() - EARLY_START_MS
+    : null;
+
+  const isTooEarly = callOpensAt !== null && now < callOpensAt;
+
+  /*
+   * Tick while waiting for the call window so the button enables on time.
+   */
+  useEffect(() => {
+    if (appt?.status !== 'confirmed' || !isTooEarly) {
+      return;
+    }
+
+    const interval = setInterval(() => setNow(Date.now()), 30 * 1000);
+
+    return () => clearInterval(interval);
+  }, [appt?.status, isTooEarly]);
+
+  const isPaid = appt?.paymentStatus === 'payment_confirmed';
+
+  const canStartCall =
+    appt?.status === 'confirmed' &&
+    isPaid &&
+    !!appt?.meeting_id &&
+    callOpensAt !== null &&
+    !isTooEarly;
+
+  const callHint =
+    appt?.status !== 'confirmed'
+      ? null
+      : !isPaid
+        ? 'The call can be started once the patient has paid.'
+        : isTooEarly && callOpensAt !== null
+          ? `You can start the call from ${new Date(
+              callOpensAt
+            ).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}.`
+          : null;
+
+  const handleStartCall = () => {
+    if (!appt || !canStartCall) {
+      return;
+    }
+
+    router.navigate({
+      pathname: '/appointments/meeting',
+      params: {
+        appointmentId: appt.id,
+        meetingNumber: String(appt.meeting_id),
+        meetingLink: appt.meeting_link,
+      },
+    });
+  };
+
+  const handleAccept = async () => {
+    if (!appt || !token || accepting) {
+      return;
+    }
+
+    try {
+      setAccepting(true);
+      await apiAcceptAppointment(appt.id, token);
+      await fetchAppointment();
+    } catch (e: any) {
+      Alert.alert(
+        'Unable to accept appointment',
+        e?.message ?? 'Something went wrong. Please try again.'
+      );
+    } finally {
+      setAccepting(false);
     }
   };
+
+  console.log(appt);
 
   const fullName = patient
     ? [patient.firstName, patient.lastName].filter(Boolean).join(' ')
@@ -169,11 +261,6 @@ const BookingDetailsScreen = () => {
         bgColor: appTheme.colors.surfaceCard,
       };
 
-  // const paymentLink =
-  //   appt && 'authorization_url' in appt
-  //     ? (appt as PaymentLinkAppointmentData)
-  //     : null;
-
   const appointmentDate = appt?.appointment_time
     ? new Date(appt.appointment_time).toLocaleString(undefined, {
         weekday: 'long',
@@ -185,8 +272,6 @@ const BookingDetailsScreen = () => {
       })
     : '—';
 
-  // const paymentData = appt as PaymentLinkAppointmentData;
-
   // const handleVerifyPayment = async () => {
   //   const response = await apiVerifyTransaction(
   //     paymentData.reference,
@@ -197,12 +282,20 @@ const BookingDetailsScreen = () => {
   //   }
   // };
 
+  const handleGoBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/appointments');
+  };
+
   const styles = useThemedStyles((theme) =>
     StyleSheet.create({
       container: {
         flex: 1,
         backgroundColor: theme.colors.background,
-        paddingBottom: theme.spacing.xxl,
+        paddingVertical: theme.spacing.xxl,
       },
       center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
       scroll: { padding: theme.spacing.base, paddingBottom: 48 },
@@ -230,6 +323,19 @@ const BookingDetailsScreen = () => {
         alignItems: 'center',
         gap: theme.spacing.sm,
       },
+
+      copyIconView: {
+        marginLeft: 5,
+        flexDirection: 'row',
+        gap: 2,
+        alignItems: 'center',
+      },
+
+      copyText: {
+        color: theme.colors.textMuted,
+        fontSize: theme.typography.sizes.xxs,
+      },
+
       bannerText: {
         fontFamily: theme.typography.fonts?.sans,
         fontSize: theme.typography.sizes.sm,
@@ -244,11 +350,16 @@ const BookingDetailsScreen = () => {
         padding: theme.spacing.base,
         marginBottom: theme.spacing.base,
       },
+
       heroInner: {
         flexDirection: 'row',
         alignItems: 'center',
-        // marginBottom: theme.spacing.base,
       },
+
+      appHeader: {
+        paddingHorizontal: theme.spacing.base,
+      },
+
       avatarWrapper: { marginRight: theme.spacing.md },
       avatarImage: {
         width: 90,
@@ -325,8 +436,7 @@ const BookingDetailsScreen = () => {
         borderColor: theme.colors.border,
       },
       navArrow: {
-        width: 'auto',
-        flex: 1,
+        marginLeft: theme.spacing.base,
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignContent: 'center',
@@ -461,6 +571,13 @@ const BookingDetailsScreen = () => {
         marginTop: theme.spacing.md,
         color: theme.colors.mono.light,
       },
+      callHint: {
+        marginTop: theme.spacing.sm,
+        textAlign: 'center',
+        fontFamily: theme.typography.fonts?.sans,
+        fontSize: theme.typography.sizes.sm,
+        color: theme.colors.textMuted,
+      },
       cancelBtn: {
         backgroundColor: theme.colors.dangerBg,
         marginTop: theme.spacing.md,
@@ -470,6 +587,13 @@ const BookingDetailsScreen = () => {
       },
     })
   );
+
+  const handleCopyPress = () => {
+    if (!appt?.meeting_link) return;
+    setLinkCopied(true);
+    Clipboard.setString(appt?.meeting_link);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
 
   if (loading) {
     return (
@@ -500,6 +624,11 @@ const BookingDetailsScreen = () => {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
+        <AppHeader
+          title="Appointment"
+          onBack={handleGoBack}
+          style={styles.appHeader}
+        />
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
@@ -509,7 +638,7 @@ const BookingDetailsScreen = () => {
           }
         >
           {/* Banner */}
-          {banner && (
+          {/* {banner && (
             <View
               style={[
                 styles.banner,
@@ -524,7 +653,7 @@ const BookingDetailsScreen = () => {
               ]}
             >
               <IconSymbol
-                name={banner ? banner.icon : 'info.circle.fill'}
+                name={banner ? banner.icon : 'checkmark'}
                 size={24}
                 color={banner ? banner.color : appTheme.colors.text}
               />
@@ -537,14 +666,19 @@ const BookingDetailsScreen = () => {
                 {banner ? banner.message : 'confirmed'}
               </Text>
             </View>
-          )}
+          )} */}
 
           {/* Doctors card */}
           <View style={styles.heroCard}>
             <View style={styles.heroInner}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => router.push(`/patients/${patient?.user_id}`)}
+                onPress={() =>
+                  router.push({
+                    pathname: '/patients/[id]',
+                    params: { id: patient?.user_id ?? '' },
+                  })
+                }
                 style={styles.avatarWrapper}
               >
                 {patient?.profilePicture?.url ? (
@@ -653,25 +787,33 @@ const BookingDetailsScreen = () => {
                   />
                 </View>
                 <View style={styles.visitInfoContent}>
-                  <Text style={styles.visitInfoLabel}>Meeting Link</Text>
+                  <Text style={styles.visitInfoLabel}>
+                    Meeting Link{' '}
+                    <TouchableOpacity
+                      style={styles.copyIconView}
+                      activeOpacity={0.7}
+                      onPress={handleCopyPress}
+                    >
+                      <IconSymbol
+                        name={linkCopied ? 'checkmark' : 'doc.on.clipboard'}
+                        size={16}
+                        color={appTheme.colors.textMuted}
+                      />
+                      <Text style={styles.copyText}>
+                        {linkCopied ? 'Copied' : ''}
+                      </Text>
+                    </TouchableOpacity>
+                  </Text>
                   <Text style={styles.visitInfoText}>
-                    {truncate(appt?.join_link || '', 30)}
+                    {truncate(appt?.meeting_link || '', 30)}
                   </Text>
                 </View>
                 <TouchableOpacity
-                  // onPress={() =>
-                  //   router.navigate('/ZoomMeeting', {
-                  //     appointmentId: appt!.id,
-                  //     meetingNumber: String(appt!.meeting_id),
-                  //     meetingPassword: appt!.meeting_password,
-                  //     joinLink: appt?.join_link,
-                  //     meetingLink: appt?.meeting_link,
-                  //   })
-                  // }
-                  disabled={!appt?.meeting_id}
-                  style={styles.navArrow}
+                  onPress={handleStartCall}
+                  disabled={!canStartCall}
+                  style={[styles.navArrow, !canStartCall && { opacity: 0.4 }]}
                 >
-                  <Text style={styles.navArrowText}>Join</Text>
+                  <Text style={styles.navArrowText}>Start</Text>
                   <IconSymbol
                     name="chevron.right"
                     size={20}
@@ -697,12 +839,6 @@ const BookingDetailsScreen = () => {
             <View style={{ marginBottom: appTheme.spacing.base }}>
               <Button
                 label="Reports and Review"
-                // onPress={() =>
-                //   router.navigate('/complete-appointment', {
-                //     id: appt.id,
-                //     doctorId: appt?.provider_id,
-                //   })
-                // }
                 onPress={() => {}}
                 loading={loading}
                 disabled={!appt?.provider_id}
@@ -716,7 +852,7 @@ const BookingDetailsScreen = () => {
             <View>
               <Text style={styles.sectionTitle}>Uploaded Files</Text>
               <Text style={styles.sectionSubtitle}>
-                Here are the files you have uploaded for your appointment.
+                Here are the files uploaded for the appointment.
               </Text>
             </View>
             <View style={styles.uploadedFile}>
@@ -734,7 +870,7 @@ const BookingDetailsScreen = () => {
             <View>
               <Text style={styles.sectionTitle}>Payment Details</Text>
               <Text style={styles.sectionSubtitle}>
-                Here are the cost/payment details for your appointment.
+                Here is the payment details for your appointment.
               </Text>
             </View>
             <View style={styles.paymentInfoCard}>
@@ -782,18 +918,26 @@ const BookingDetailsScreen = () => {
 
           {/* Buttons */}
           <View style={{}}>
-            <Button
-              label="Accept Appointment"
-              // onPress={() =>
-              //   router.navigate('/reschedule', {
-              //     providerId: appt?.provider_id,
-              //   })
-              // }
-              onPress={() => {}}
-              loading={loading}
-              disabled={!appt?.provider_id}
-              style={styles.rescheduleBtn}
-            />
+            {appt?.status === 'pending' && (
+              <Button
+                label="Accept Appointment"
+                onPress={handleAccept}
+                loading={accepting}
+                disabled={!appt?.provider_id}
+                style={styles.rescheduleBtn}
+              />
+            )}
+            {appt?.status === 'confirmed' && (
+              <>
+                <Button
+                  label="Start Consultation"
+                  onPress={handleStartCall}
+                  disabled={!canStartCall}
+                  style={styles.rescheduleBtn}
+                />
+                {callHint && <Text style={styles.callHint}>{callHint}</Text>}
+              </>
+            )}
             <Button
               label="Cancel Appointment"
               // onPress={() =>
@@ -812,6 +956,6 @@ const BookingDetailsScreen = () => {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-};
+};;
 
 export default BookingDetailsScreen;

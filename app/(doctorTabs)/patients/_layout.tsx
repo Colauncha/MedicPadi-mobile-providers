@@ -16,7 +16,7 @@ export const PatientsPage = () => {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: true,
+          // headerShown: true,
           title: 'Patients',
           headerTitleAlign: 'center',
           headerTitleStyle: {
@@ -33,7 +33,7 @@ export const PatientsPage = () => {
       <Stack.Screen
         name="[id]"
         options={{
-          headerShown: true,
+          // headerShown: true,
           title: 'Patient',
           headerTitleAlign: 'center',
           headerTitleStyle: {

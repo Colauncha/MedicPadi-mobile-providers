@@ -64,6 +64,7 @@ const DashboardHeaderElement = ({
         height: 90,
         position: 'relative',
         left: -10,
+        elevation: 2,
       },
       logoRowIcons: {
         flexDirection: 'row',
@@ -72,10 +73,14 @@ const DashboardHeaderElement = ({
       },
       icons: {
         padding: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         borderRadius: theme.radius.full,
         backgroundColor: theme.colors.mono.light,
         height: 32,
         width: 32,
+        elevation: 2,
       },
       welcomeRow: {
         paddingHorizontal: 5,
@@ -103,11 +108,13 @@ const DashboardHeaderElement = ({
         backgroundColor: theme.colors.surfaceCardBlue,
         alignItems: 'flex-start',
         position: 'relative',
+        elevation: 4,
       },
       statValue: {
         color: theme.colors.mono.light,
         fontSize: theme.typography.sizes.xl,
         paddingTop: theme.spacing.xxl + 20,
+        elevation: 12,
       },
       statLabel: {
         color: theme.colors.mono.light,
@@ -161,12 +168,14 @@ const DashboardHeaderElement = ({
             style={styles.icons}
             color={appTheme.colors.mono.darkGray}
           />
-          <IconSymbol
-            name="bell.badge.fill"
-            size={24}
-            style={styles.icons}
-            color={appTheme.colors.mono.darkGray}
-          />
+          <Pressable onPress={() => router.push('/notifications')}>
+            <IconSymbol
+              name="bell.fill"
+              size={24}
+              style={styles.icons}
+              color={appTheme.colors.mono.darkGray}
+            />
+          </Pressable>
           {profile?.profile.profilePicture?.url ? (
             <Pressable onPress={() => router.push('/profile')}>
               <Image
@@ -360,6 +369,7 @@ export default function HomeScreen() {
         borderRadius: theme.radius.lg,
         marginHorizontal: theme.spacing.base,
         // boxShadow: theme.shadows.heavy,
+        elevation: 10,
       },
       titleRow: {
         flexDirection: 'row',
@@ -459,7 +469,12 @@ export default function HomeScreen() {
               </Text>
             </Text>
             <TouchableOpacity
-              onPress={() => router.push('/appointments?status=pending' as any)}
+              onPress={() =>
+                router.push({
+                  pathname: '/appointments',
+                  params: { status: 'request' },
+                })
+              }
             >
               <Text style={styles.viewAll}>View All</Text>
             </TouchableOpacity>

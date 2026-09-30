@@ -489,6 +489,7 @@ const useFetchAppointments = () => {
 
 export default function Appointments() {
   const { theme: appTheme } = useTheme();
+  // let { status } = useLocalSearchParams<{ status: FilterType | '' }>();
 
   const {
     appointments,
@@ -511,7 +512,7 @@ export default function Appointments() {
 
       search: {
         flexDirection: 'row',
-        padding: theme.spacing.md,
+        paddingHorizontal: theme.spacing.sm,
         alignItems: 'center',
         justifyContent: 'space-between',
         borderWidth: 1,
@@ -519,13 +520,14 @@ export default function Appointments() {
         margin: theme.spacing.md,
         borderRadius: theme.radius.xl,
         position: 'relative',
+        height: 40,
       },
 
       searchInput: {
         width: '100%',
         color: theme.colors.text,
         fontFamily: theme.typography.fonts?.sans,
-        fontSize: theme.typography.sizes.md,
+        fontSize: theme.typography.sizes.sm,
       },
 
       searchIcon: {
@@ -536,7 +538,6 @@ export default function Appointments() {
       filterRow: {
         flexDirection: 'row',
         paddingHorizontal: theme.spacing.md,
-        marginBottom: theme.spacing.sm,
         gap: theme.spacing.sm,
         height: 35,
         alignItems: 'center',
@@ -648,6 +649,8 @@ export default function Appointments() {
 
   const renderAppointments = useCallback(
     ({ item }: { item: AppointmentData }) => {
+      // setFilterType(status && status as FilterType);
+      // status = ''
       if (filterType === 'request') {
         return (
           <AppointmentRequestRow
@@ -681,7 +684,7 @@ export default function Appointments() {
     <SafeAreaView style={styles.container}>
       <View style={styles.search}>
         <TextInput
-          placeholder="Search Patients"
+          placeholder="Search Appointments"
           placeholderTextColor={appTheme.colors.textMuted}
           keyboardType="default"
           style={styles.searchInput}
@@ -747,7 +750,7 @@ export default function Appointments() {
                 size={48}
                 color={appTheme.colors.textMuted}
               />
-              <Text style={styles.emptyText}>No patients found</Text>
+              <Text style={styles.emptyText}>No Appointment yet</Text>
             </View>
           }
         />

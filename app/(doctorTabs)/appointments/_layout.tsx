@@ -16,7 +16,7 @@ export const AppointmentsPage = () => {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: true,
+          // headerShown: true,
           title: 'Appointment',
           headerTitleAlign: 'center',
           headerTitleStyle: {
@@ -33,7 +33,7 @@ export const AppointmentsPage = () => {
       <Stack.Screen
         name="[id]"
         options={{
-          headerShown: true,
+          // headerShown: true,
           title: 'Appointment Details',
           headerBackVisible: true,
           headerTitleAlign: 'center',
@@ -48,6 +48,7 @@ export const AppointmentsPage = () => {
           },
         }}
       />
+      <Stack.Screen name="meeting" />
     </Stack>
   );
 };

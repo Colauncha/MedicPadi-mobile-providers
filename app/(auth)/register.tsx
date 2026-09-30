@@ -5,7 +5,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
-import { storage } from '@/utils/storage';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -19,11 +18,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const FRESH_REGISTRATION = 'fresh_registration';
-
 const Register = () => {
   const { usertype: userType } = useLocalSearchParams();
-  const { register } = useAuth();
+  const { register, markFreshRegistration } = useAuth();
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -74,7 +71,7 @@ const Register = () => {
       });
 
       if (Platform.OS === 'web') {
-        storage.setItem(FRESH_REGISTRATION, '1').catch(() => {});
+        markFreshRegistration();
         router.navigate('/login');
       }
 
@@ -82,7 +79,7 @@ const Register = () => {
         {
           text: 'OK',
           onPress: () => {
-            storage.setItem(FRESH_REGISTRATION, '1').catch(() => {});
+            markFreshRegistration();
             router.navigate('/login');
           },
         },

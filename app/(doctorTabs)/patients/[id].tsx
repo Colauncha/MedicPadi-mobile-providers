@@ -1,509 +1,7 @@
-// import AvatarFromString from '@/components/avatar';
-// import { ThemedText } from '@/components/themed-text';
-// import { useAuth } from '@/context/AuthContext';
-// import { useThemedStyles } from '@/hooks/useThemedStyle';
-// import {
-//   apiGetAppointments,
-//   apiGetProfileById,
-//   AppointmentData,
-//   ProfileFields,
-// } from '@/services/api';
-// import { useTheme } from '@/theme/ThemeProvider';
-// import { Theme } from '@/theme/types';
-// import { getAge } from '@/utils/formatter';
-// import { Image } from 'expo-image';
-// import { useLocalSearchParams } from 'expo-router';
-// import { useCallback, useEffect, useState } from 'react';
-// import {
-//   ActivityIndicator,
-//   FlatList,
-//   RefreshControl,
-//   ScrollView,
-//   StyleSheet,
-//   TouchableOpacity,
-//   View,
-// } from 'react-native';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-
-// const DetailsTab = ({
-//   patient,
-//   patientId,
-//   providerId,
-//   token,
-//   theme,
-// }: {
-//   patient: ProfileFields;
-//   patientId: string;
-//   providerId: string;
-//   token: string;
-//   theme: Theme;
-// }) => {
-//   const [pastAppointments, setPastAppointment] = useState<
-//     AppointmentData[] | []
-//   >([]);
-
-//   useEffect(() => {
-//     if (!token || token === '') return;
-//     try {
-//       (async () => {
-//         const resp = await apiGetAppointments(
-//           { ids: [patientId, providerId] },
-//           token
-//         );
-//         console.log(resp);
-//         setPastAppointment(resp.data);
-//       })();
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   }, [token, patientId, providerId]);
-
-//   const styles = StyleSheet.create({
-//     sectionHeader: {
-//       marginTop: theme.spacing.lg,
-//       color: theme.colors.textSecondary,
-//       fontSize: theme.typography.sizes.base,
-//     },
-
-//     sectionRow: {
-//       flexDirection: 'row',
-//       width: '100%',
-//       justifyContent: 'space-between',
-//       alignItems: 'center',
-//       marginVertical: theme.spacing.sm,
-//     },
-
-//     sectionSubText: {
-//       color: theme.colors.textSecondary,
-//       fontSize: theme.typography.sizes.md,
-//       textTransform: 'capitalize',
-//     },
-
-//     pastAppHeader: {
-//       flexDirection: 'row',
-//       justifyContent: 'space-between',
-//     },
-
-//     viewAll: {
-//       marginTop: theme.spacing.lg,
-//       color: theme.colors.primary.extraDeep,
-//       fontSize: theme.typography.sizes.sm,
-//       textDecorationLine: 'underline',
-//     },
-
-//     avatar: {
-//       width: 30,
-//       height: 30,
-//       borderRadius: theme.radius.full,
-//       overflow: 'hidden',
-//       backgroundColor: theme.colors.surface,
-//     },
-
-//     avatarImg: {
-//       width: 30,
-//       height: 30,
-//       borderRadius: theme.radius.full,
-//     },
-
-//     listHeader: {
-//       flexDirection: 'row',
-//     },
-
-//     listHeaderText: {
-//       marginRight: theme.spacing.md,
-//       color: theme.colors.textSecondary,
-//       fontSize: theme.typography.sizes.base,
-//       fontWeight: '800',
-//     },
-
-//     listHeaderSubText: {
-//       marginRight: theme.spacing.md,
-//       color: theme.colors.textMuted,
-//       fontSize: theme.typography.sizes.sm,
-//     },
-//   });
-
-//   const patientName =
-//     [patient?.firstName, patient?.lastName].filter(Boolean).join(' ') ||
-//     'Unnamed Patient';
-
-//   const renderItems = useCallback(
-//     ({ item }: { item: AppointmentData }) => {
-//       const appointmentType = item.description?.split('-')[0] ?? 'Consultation';
-//       return (
-//         <View>
-//           <View style={styles.listHeader}>
-//             <View style={styles.avatar}>
-//               {patient.profilePicture?.url ? (
-//                 <Image
-//                   source={{ uri: patient.profilePicture.url }}
-//                   style={styles.avatarImg}
-//                 />
-//               ) : (
-//                 <AvatarFromString input={patientName} size={56} />
-//               )}
-//             </View>
-//             <View>
-//               <ThemedText style={styles.listHeaderText}>
-//                 {patientName}
-//               </ThemedText>
-//               <ThemedText style={styles.listHeaderSubText}>
-//                 {appointmentType}
-//               </ThemedText>
-//             </View>
-//           </View>
-//         </View>
-//       );
-//     },
-//     [patient, patientName, styles]
-//   );
-
-//   return (
-//     <View>
-//       {/* Personal Info */}
-//       <View>
-//         <ThemedText style={styles.sectionHeader}>
-//           Personal Information
-//         </ThemedText>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Name</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>{patientName}</ThemedText>
-//         </View>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Age</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>
-//             {getAge(patient.dateOfBirth || '', 'yrs')}
-//           </ThemedText>
-//         </View>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Gender</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>
-//             {patient.gender}
-//           </ThemedText>
-//         </View>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Blood Group</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>
-//             {patient.bloodGroup}
-//           </ThemedText>
-//         </View>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Genotype</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>
-//             {patient.genotype}
-//           </ThemedText>
-//         </View>
-//       </View>
-//       {/* Emergency info */}
-//       <View>
-//         <ThemedText style={styles.sectionHeader}>Emergency Details</ThemedText>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Name</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>
-//             {patient.nextOfKin?.name || '-'}
-//           </ThemedText>
-//         </View>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Email</ThemedText>
-//           <ThemedText
-//             style={[styles.sectionSubText, { textTransform: 'none' }]}
-//           >
-//             {patient.nextOfKin?.email || '-'}
-//           </ThemedText>
-//         </View>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Phone</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>
-//             {patient.nextOfKin?.phone || '-'}
-//           </ThemedText>
-//         </View>
-//         <View style={styles.sectionRow}>
-//           <ThemedText>Relationship</ThemedText>
-//           <ThemedText style={styles.sectionSubText}>
-//             {patient.nextOfKin?.relationship || '-'}
-//           </ThemedText>
-//         </View>
-//       </View>
-//       {/* Past appointments */}
-//       <View>
-//         <View style={styles.pastAppHeader}>
-//           <ThemedText style={styles.sectionHeader}>Past Appointment</ThemedText>
-//           <TouchableOpacity activeOpacity={0.8}>
-//             <ThemedText style={styles.viewAll}>View All</ThemedText>
-//           </TouchableOpacity>
-//         </View>
-//         <FlatList
-//           data={pastAppointments}
-//           keyExtractor={(item, index) => item.id ?? index}
-//           showsVerticalScrollIndicator={false}
-//           contentContainerStyle={{
-//             paddingBottom: theme.spacing.lg,
-//           }}
-//           renderItem={renderItems}
-//         />
-//       </View>
-//     </View>
-//   );
-// };
-
-// const ReportsTab = () => {
-//   return <View></View>;
-// };
-
-// const PatientDetails = () => {
-//   const { id } = useLocalSearchParams();
-//   const { token, user } = useAuth();
-//   const { theme: appTheme } = useTheme();
-
-//   const [patient, setPatient] = useState<ProfileFields | null>(null);
-
-//   const [refreshing, setRefresing] = useState(false);
-//   const [currentTab, setCurrentTab] = useState<'detail' | 'report'>('detail');
-
-//   useEffect(() => {
-//     if (!token) return;
-//     try {
-//       (async () => {
-//         const resp = await apiGetProfileById(id as string, 'patient', token);
-//         if (resp) setPatient(resp.profile);
-//       })();
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   }, [id, token]);
-
-//   const handleRefresh = async () => {
-//     if (!token) return;
-
-//     setRefresing(true);
-//     try {
-//       const resp = await apiGetProfileById(id as string, 'patient', token);
-//       if (resp) setPatient(resp.profile);
-//     } catch (error) {
-//       console.log(error);
-//     } finally {
-//       setRefresing(false);
-//     }
-//   };
-
-//   const styles = useThemedStyles((theme) =>
-//     StyleSheet.create({
-//       container: {
-//         flex: 1,
-//         paddingHorizontal: theme.spacing.base,
-//         backgroundColor: theme.colors.background,
-//       },
-
-//       scroll: {
-//         flexGrow: 1,
-//         alignItems: 'center',
-//         paddingHorizontal: theme.spacing.base,
-//         paddingBottom: theme.spacing.xxl + 60,
-//       },
-
-//       avatar: {
-//         width: 140,
-//         height: 140,
-//         borderRadius: theme.radius.full,
-//         borderWidth: 10,
-//         borderColor: theme.colors.background,
-//         position: 'absolute',
-//         top: -80,
-//       },
-
-//       header: {
-//         borderRadius: theme.radius.lg,
-//         width: '100%',
-//         height: theme.spacing.xxl * 5,
-//         backgroundColor: theme.colors.surfaceCardLight,
-//         marginTop: theme.spacing.xxl * 3,
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//         position: 'relative',
-//       },
-
-//       details: {
-//         marginTop: theme.spacing.xxl + 5,
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//       },
-
-//       headerText: {
-//         fontSize: theme.typography.sizes.xl,
-//         color: theme.colors.textSecondary,
-//       },
-//       headerSubText: {
-//         marginTop: theme.spacing.md,
-//         fontSize: theme.typography.sizes.md,
-//         color: theme.colors.textMuted,
-//       },
-
-//       tabGroup: {
-//         flexDirection: 'column',
-//         width: '100%',
-//         marginTop: theme.spacing.xl * 2,
-//       },
-
-//       tabHeaders: {
-//         flexGrow: 1,
-//         flexDirection: 'row',
-//         alignItems: 'center',
-//         justifyContent: 'space-evenly',
-//         // position: 'sticky'
-//       },
-
-//       tabText: {
-//         color: theme.colors.textMuted,
-//         marginBottom: theme.spacing.md,
-//       },
-
-//       tabTextActive: {
-//         color: theme.colors.primary.extraDeep,
-//       },
-
-//       tab: {
-//         borderBottomWidth: 1,
-//         borderColor: theme.colors.textMuted,
-//         width: '50%',
-//         alignItems: 'center',
-//       },
-
-//       tabActive: {
-//         borderBottomWidth: 3,
-//         borderColor: theme.colors.primary.extraDeep,
-//       },
-//     })
-//   );
-
-//   const patientUrl = patient?.profilePicture?.url;
-//   const patientName =
-//     [patient?.firstName, patient?.lastName].filter(Boolean).join(' ') ||
-//     'Patient';
-
-//   if (!patient) {
-//     return (
-//       <View
-//         style={[
-//           styles.container,
-//           {
-//             flexGrow: 1,
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//           },
-//         ]}
-//       >
-//         <ActivityIndicator color={appTheme.colors.primary.extraDeep} />
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <SafeAreaView style={styles.container} edges={[]}>
-//       <ScrollView
-//         contentContainerStyle={styles.scroll}
-//         showsVerticalScrollIndicator={false}
-//         keyboardShouldPersistTaps="handled"
-//         refreshControl={
-//           <RefreshControl
-//             refreshing={refreshing}
-//             onRefresh={handleRefresh}
-//             tintColor={appTheme.colors.textSecondary}
-//             colors={[appTheme.colors.textSecondary]}
-//           />
-//         }
-//       >
-//         <View style={styles.header}>
-//           {patientUrl ? (
-//             <Image source={patientUrl} style={styles.avatar} />
-//           ) : (
-//             <AvatarFromString input={patientName} size={140} />
-//           )}
-//           <View style={styles.details}>
-//             <ThemedText type="title" style={styles.headerText}>
-//               {patientName}
-//             </ThemedText>
-//             <View>
-//               <ThemedText type="subtitle" style={styles.headerSubText}>
-//                 {patient?.dateOfBirth
-//                   ? getAge(patient?.dateOfBirth, ' yrs')
-//                   : 'Unknown Age'}
-//                 {'  •  '}
-//                 {patient?.weight ? `${patient.weight} Kg` : 'Unknown Weight'}
-//                 {'  •  '}
-//                 {patient?.height ? `${patient.height} cm` : 'Unknown Height'}
-//               </ThemedText>
-//             </View>
-//           </View>
-//         </View>
-//         <View style={styles.tabGroup}>
-//           <View style={styles.tabHeaders}>
-//             <TouchableOpacity
-//               onPress={() => setCurrentTab('detail')}
-//               activeOpacity={0.8}
-//               style={[
-//                 styles.tab,
-//                 ...[currentTab === 'detail' && styles.tabActive],
-//               ]}
-//             >
-//               <ThemedText
-//                 style={[
-//                   styles.tabText,
-//                   ...[currentTab === 'detail' && styles.tabTextActive],
-//                 ]}
-//               >
-//                 Patient Details
-//               </ThemedText>
-//             </TouchableOpacity>
-//             <TouchableOpacity
-//               onPress={() => setCurrentTab('report')}
-//               activeOpacity={0.8}
-//               style={[
-//                 styles.tab,
-//                 ...[currentTab === 'report' && styles.tabActive],
-//               ]}
-//             >
-//               <ThemedText
-//                 style={[
-//                   styles.tabText,
-//                   ...[currentTab === 'report' && styles.tabTextActive],
-//                 ]}
-//               >
-//                 Reports
-//               </ThemedText>
-//             </TouchableOpacity>
-//           </View>
-//           <View>
-//             {currentTab === 'detail' ? (
-//               <DetailsTab
-//                 patient={patient}
-//                 patientId={id as string}
-//                 providerId={user?.id || ''}
-//                 token={token || ''}
-//                 theme={appTheme}
-//               />
-//             ) : currentTab === 'report' ? (
-//               <ReportsTab />
-//             ) : (
-//               <DetailsTab
-//                 patient={patient}
-//                 patientId={id as string}
-//                 providerId={user?.id || ''}
-//                 token={token || ''}
-//                 theme={appTheme}
-//               />
-//             )}
-//           </View>
-//         </View>
-//       </ScrollView>
-//     </SafeAreaView>
-//   );
-// };
-
-// export default PatientDetails;
-
 import AvatarFromString from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { AppHeader } from '@/components/ui/AppHeader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
@@ -517,7 +15,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { Theme } from '@/theme/types';
 import { formatDateWeekday, formatTime, getAge } from '@/utils/formatter';
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -532,6 +30,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Tab = 'detail' | 'report';
+
+const AVATAR_SIZE = 120;
+const AVATAR_BORDER = 5;
 
 type DetailsTabProps = {
   patient: ProfileFields;
@@ -591,13 +92,32 @@ const DetailsTab = ({
     () =>
       StyleSheet.create({
         section: {
-          marginBottom: theme.spacing.base,
+          marginBottom: theme.spacing.xl,
+          backgroundColor: theme.colors.surfaceCard,
+          borderRadius: theme.radius.xl,
+          paddingHorizontal: theme.spacing.lg,
+          paddingTop: theme.spacing.sm,
+          paddingBottom: theme.spacing.md,
+          borderWidth: 0.5,
+          borderColor: theme.colors.border,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.04,
+          shadowRadius: 8,
+          elevation: 1,
         },
+        sectionPlain: {
+          marginBottom: theme.spacing.xl,
+        },
+
         sectionHeader: {
-          marginTop: theme.spacing.lg,
+          marginTop: theme.spacing.md,
+          marginBottom: theme.spacing.xs,
           color: theme.colors.textSecondary,
-          fontSize: theme.typography.sizes.base,
+          fontSize: theme.typography.sizes.sm,
           fontWeight: '800',
+          letterSpacing: 0.6,
+          textTransform: 'uppercase',
         },
 
         sectionRow: {
@@ -605,14 +125,27 @@ const DetailsTab = ({
           width: '100%',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginVertical: theme.spacing.sm,
+          gap: theme.spacing.base,
+          paddingVertical: theme.spacing.md,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: theme.colors.border,
+        },
+
+        sectionRowLast: {
+          borderBottomWidth: 0,
+        },
+
+        sectionLabel: {
+          color: theme.colors.textMuted,
+          fontSize: theme.typography.sizes.sm,
         },
 
         sectionSubText: {
-          color: theme.colors.textSecondary,
+          color: theme.colors.text,
+          fontWeight: '600',
           fontSize: theme.typography.sizes.md,
           textTransform: 'capitalize',
-          maxWidth: '60%',
+          flexShrink: 1,
           textAlign: 'right',
         },
 
@@ -620,13 +153,14 @@ const DetailsTab = ({
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
+          paddingHorizontal: theme.spacing.xs,
         },
 
         viewAll: {
-          marginTop: theme.spacing.lg,
+          marginTop: theme.spacing.md,
           color: theme.colors.primary.extraDeep,
           fontSize: theme.typography.sizes.sm,
-          textDecorationLine: 'underline',
+          fontWeight: '700',
         },
 
         avatar: {
@@ -644,49 +178,56 @@ const DetailsTab = ({
         },
 
         listCard: {
-          backgroundColor: theme.colors.surfaceCardLight,
-          padding: theme.spacing.md,
+          backgroundColor: theme.colors.surfaceCard,
+          padding: theme.spacing.base,
           marginTop: theme.spacing.md,
           borderRadius: theme.radius.xl,
+          borderWidth: 0.5,
+          borderColor: theme.colors.border,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 2,
         },
 
         listHeader: {
           flexDirection: 'row',
           alignItems: 'center',
-          borderBottomWidth: 1,
+          gap: theme.spacing.md,
+          borderBottomWidth: StyleSheet.hairlineWidth,
           borderColor: theme.colors.border,
-          paddingBottom: theme.spacing.sm,
-          position: 'relative',
+          paddingBottom: theme.spacing.md,
+        },
+
+        listHeaderInfo: {
+          flex: 1,
         },
 
         listHeaderText: {
-          marginLeft: theme.spacing.md,
-          color: theme.colors.textSecondary,
+          color: theme.colors.text,
           fontSize: theme.typography.sizes.base,
-          fontWeight: '800',
+          fontWeight: '700',
         },
 
         listHeaderSubText: {
-          marginLeft: theme.spacing.md,
           marginTop: 2,
           color: theme.colors.textMuted,
           fontSize: theme.typography.sizes.sm,
         },
 
         statusBox: {
-          borderRadius: theme.radius.lg,
+          borderRadius: theme.radius.full,
           paddingHorizontal: theme.spacing.md,
-          paddingVertical: theme.spacing.xs / 2,
-          position: 'absolute',
-          right: 0,
+          paddingVertical: theme.spacing.xs,
           justifyContent: 'center',
           alignItems: 'center',
         },
 
         statusText: {
-          fontWeight: '800',
+          fontWeight: '700',
           fontFamily: theme.typography.fonts?.mono,
-          fontSize: theme.typography.sizes.sm,
+          fontSize: theme.typography.sizes.xs ?? theme.typography.sizes.sm,
           textTransform: 'capitalize',
         },
 
@@ -695,18 +236,19 @@ const DetailsTab = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           width: '100%',
-          paddingVertical: theme.spacing.lg,
+          paddingVertical: theme.spacing.md,
         },
 
         listContentIcon: {
-          padding: theme.spacing.md,
-          borderRadius: theme.radius.full,
-          backgroundColor: theme.colors.surfaceCard,
+          padding: theme.spacing.sm,
+          borderRadius: theme.radius.lg,
+          overflow: 'hidden',
+          backgroundColor: theme.colors.primary.shallow,
         },
 
         listSubContent: {
           flexDirection: 'row',
-          width: '45%',
+          width: '46%',
           alignItems: 'center',
           gap: theme.spacing.sm,
         },
@@ -714,24 +256,79 @@ const DetailsTab = ({
         listButtons: {
           flexDirection: 'row',
           width: '100%',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           alignItems: 'center',
+          gap: theme.spacing.sm,
         },
 
         listContentText: {
-          flexGrow: 1,
+          flex: 1,
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
         },
 
-        listContentSubText: {
-          marginTop: 1,
+        listContentLabel: {
           color: theme.colors.textMuted,
+          fontSize: theme.typography.sizes.xs ?? theme.typography.sizes.sm,
+        },
+
+        listContentSubText: {
+          marginTop: 2,
+          color: theme.colors.text,
+          fontWeight: '600',
           fontSize: theme.typography.sizes.sm,
         },
 
         listButton: {
-          width: '45%',
+          width: '100%',
+          height: theme.spacing.xxl,
+        },
+
+        emptyState: {
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: theme.spacing.md,
+          paddingVertical: theme.spacing.xl,
+          gap: theme.spacing.sm,
+          borderRadius: theme.radius.xl,
+          borderWidth: 1,
+          borderStyle: 'dashed',
+          borderColor: theme.colors.border,
+        },
+
+        emptyStateText: {
+          color: theme.colors.textMuted,
+          fontSize: theme.typography.sizes.sm,
+        },
+
+        allergyList: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: theme.spacing.sm,
+          paddingVertical: theme.spacing.md,
+        },
+
+        allergyChip: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: theme.spacing.xs,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.xs + 2,
+          borderRadius: theme.radius.full,
+          backgroundColor: theme.colors.dangerBg,
+        },
+
+        allergyChipText: {
+          color: theme.colors.danger,
+          fontSize: theme.typography.sizes.sm,
+          fontWeight: '600',
+          textTransform: 'capitalize',
+        },
+
+        noAllergiesText: {
+          paddingVertical: theme.spacing.md,
+          color: theme.colors.textMuted,
+          fontSize: theme.typography.sizes.sm,
         },
       }),
     [theme]
@@ -741,10 +338,39 @@ const DetailsTab = ({
     [patient?.firstName, patient?.lastName].filter(Boolean).join(' ') ||
     'Unnamed Patient';
 
+  const statusColors = useCallback(
+    (status: AppointmentData['status']) => {
+      switch (status) {
+        case 'confirmed':
+          return {
+            bg: theme.colors.blue.base,
+            text: theme.colors.blue.extraDeep,
+          };
+        case 'completed':
+          return {
+            bg: theme.colors.successBg,
+            text: theme.colors.success,
+          };
+        case 'pending':
+          return {
+            bg: theme.colors.warningBg,
+            text: theme.colors.warning,
+          };
+        default:
+          return {
+            bg: theme.colors.dangerBg,
+            text: theme.colors.danger,
+          };
+      }
+    },
+    [theme]
+  );
+
   const renderAppointment = useCallback(
     (item: AppointmentData, index: number) => {
       const appointmentType =
         item.description?.split(' – ')[0]?.trim() || 'Consultation';
+      const { bg, text } = statusColors(item.status);
 
       return (
         <View
@@ -764,60 +390,18 @@ const DetailsTab = ({
               )}
             </View>
 
-            <View>
-              <ThemedText style={styles.listHeaderText}>
+            <View style={styles.listHeaderInfo}>
+              <ThemedText style={styles.listHeaderText} numberOfLines={1}>
                 {patientName}
               </ThemedText>
 
-              <ThemedText style={styles.listHeaderSubText}>
+              <ThemedText style={styles.listHeaderSubText} numberOfLines={1}>
                 {appointmentType}
               </ThemedText>
             </View>
 
-            <View
-              style={[
-                styles.statusBox,
-                ...[
-                  item.status === 'confirmed'
-                    ? {
-                        backgroundColor: theme.colors.blue.base,
-                      }
-                    : item.status === 'completed'
-                      ? {
-                          backgroundColor: theme.colors.successBg,
-                        }
-                      : item.status === 'pending'
-                        ? {
-                            backgroundColor: theme.colors.warningBg,
-                          }
-                        : {
-                            backgroundColor: theme.colors.dangerBg,
-                          },
-                ],
-              ]}
-            >
-              <ThemedText
-                style={[
-                  styles.statusText,
-                  ...[
-                    item.status === 'confirmed'
-                      ? {
-                          color: theme.colors.blue.extraDeep,
-                        }
-                      : item.status === 'completed'
-                        ? {
-                            color: theme.colors.success,
-                          }
-                        : item.status === 'pending'
-                          ? {
-                              color: theme.colors.warning,
-                            }
-                          : {
-                              color: theme.colors.danger,
-                            },
-                  ],
-                ]}
-              >
+            <View style={[styles.statusBox, { backgroundColor: bg }]}>
+              <ThemedText style={[styles.statusText, { color: text }]}>
                 {item.status}
               </ThemedText>
             </View>
@@ -826,12 +410,12 @@ const DetailsTab = ({
             <View style={styles.listSubContent}>
               <IconSymbol
                 name={'calendar.badge'}
-                size={25}
+                size={22}
                 style={styles.listContentIcon}
                 color={theme.colors.primary.extraDeep}
               />
               <View style={styles.listContentText}>
-                <ThemedText>Date</ThemedText>
+                <ThemedText style={styles.listContentLabel}>Date</ThemedText>
                 <ThemedText style={styles.listContentSubText}>
                   {formatDateWeekday(item.appointment_time, true, true)}
                 </ThemedText>
@@ -840,12 +424,12 @@ const DetailsTab = ({
             <View style={styles.listSubContent}>
               <IconSymbol
                 name={'clock.badge.fill'}
-                size={25}
+                size={22}
                 style={styles.listContentIcon}
                 color={theme.colors.primary.extraDeep}
               />
               <View style={styles.listContentText}>
-                <ThemedText>Time</ThemedText>
+                <ThemedText style={styles.listContentLabel}>Time</ThemedText>
                 <ThemedText style={styles.listContentSubText}>
                   {formatTime(item.appointment_time)}
                 </ThemedText>
@@ -856,21 +440,43 @@ const DetailsTab = ({
             <Button
               label="View Details"
               variant="outline"
-              onPress={() => {}}
-              style={styles.listButton}
-            />
-            <Button
-              label="Consult Again"
-              variant="primary"
-              onPress={() => {}}
+              onPress={() =>
+                router.push({
+                  pathname: '/appointments/[id]',
+                  params: { id: item.id },
+                })
+              }
               style={styles.listButton}
             />
           </View>
         </View>
       );
     },
-    [patient, patientName, styles, theme]
+    [patient, patientName, statusColors, styles, theme]
   );
+
+  const allergies = (patient.allergies ?? [])
+    .map((allergy) => allergy.trim())
+    .filter(Boolean);
+
+  const infoRows: { label: string; value?: string | null }[][] = [
+    [
+      { label: 'Name', value: patientName },
+      {
+        label: 'Age',
+        value: patient.dateOfBirth ? getAge(patient.dateOfBirth, 'yrs') : '-',
+      },
+      { label: 'Gender', value: patient.gender },
+      { label: 'Blood Group', value: patient.bloodGroup },
+      { label: 'Genotype', value: patient.genotype },
+    ],
+    [
+      { label: 'Name', value: patient.nextOfKin?.name },
+      { label: 'Email', value: patient.nextOfKin?.email },
+      { label: 'Phone', value: patient.nextOfKin?.phone },
+      { label: 'Relationship', value: patient.nextOfKin?.relationship },
+    ],
+  ];
 
   return (
     <View>
@@ -880,81 +486,86 @@ const DetailsTab = ({
           Personal Information
         </ThemedText>
 
-        <View style={styles.sectionRow}>
-          <ThemedText>Name</ThemedText>
-          <ThemedText style={styles.sectionSubText}>{patientName}</ThemedText>
-        </View>
+        {infoRows[0].map((row, idx) => (
+          <View
+            key={row.label}
+            style={[
+              styles.sectionRow,
+              idx === infoRows[0].length - 1 && styles.sectionRowLast,
+            ]}
+          >
+            <ThemedText style={styles.sectionLabel}>{row.label}</ThemedText>
+            <ThemedText
+              style={[
+                styles.sectionSubText,
+                row.label === 'Email' && { textTransform: 'none' },
+              ]}
+            >
+              {row.value || '-'}
+            </ThemedText>
+          </View>
+        ))}
+      </View>
 
-        <View style={styles.sectionRow}>
-          <ThemedText>Age</ThemedText>
-          <ThemedText style={styles.sectionSubText}>
-            {patient.dateOfBirth ? getAge(patient.dateOfBirth, 'yrs') : '-'}
-          </ThemedText>
-        </View>
+      {/* Allergies */}
+      <View style={styles.section}>
+        <ThemedText style={styles.sectionHeader}>Allergies</ThemedText>
 
-        <View style={styles.sectionRow}>
-          <ThemedText>Gender</ThemedText>
-          <ThemedText style={styles.sectionSubText}>
-            {patient.gender || '-'}
+        {allergies.length > 0 ? (
+          <View style={styles.allergyList}>
+            {allergies.map((allergy, idx) => (
+              <View key={`${allergy}-${idx}`} style={styles.allergyChip}>
+                <IconSymbol
+                  name="exclamationmark.triangle.fill"
+                  size={14}
+                  color={theme.colors.danger}
+                />
+                <ThemedText style={styles.allergyChipText}>
+                  {allergy}
+                </ThemedText>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <ThemedText style={styles.noAllergiesText}>
+            No known allergies
           </ThemedText>
-        </View>
-
-        <View style={styles.sectionRow}>
-          <ThemedText>Blood Group</ThemedText>
-          <ThemedText style={styles.sectionSubText}>
-            {patient.bloodGroup || '-'}
-          </ThemedText>
-        </View>
-
-        <View style={styles.sectionRow}>
-          <ThemedText>Genotype</ThemedText>
-          <ThemedText style={styles.sectionSubText}>
-            {patient.genotype || '-'}
-          </ThemedText>
-        </View>
+        )}
       </View>
 
       {/* Emergency Information */}
       <View style={styles.section}>
         <ThemedText style={styles.sectionHeader}>Emergency Details</ThemedText>
 
-        <View style={styles.sectionRow}>
-          <ThemedText>Name</ThemedText>
-          <ThemedText style={styles.sectionSubText}>
-            {patient.nextOfKin?.name || '-'}
-          </ThemedText>
-        </View>
-
-        <View style={styles.sectionRow}>
-          <ThemedText>Email</ThemedText>
-          <ThemedText
-            style={[styles.sectionSubText, { textTransform: 'none' }]}
+        {infoRows[1].map((row, idx) => (
+          <View
+            key={row.label}
+            style={[
+              styles.sectionRow,
+              idx === infoRows[1].length - 1 && styles.sectionRowLast,
+            ]}
           >
-            {patient.nextOfKin?.email || '-'}
-          </ThemedText>
-        </View>
-
-        <View style={styles.sectionRow}>
-          <ThemedText>Phone</ThemedText>
-          <ThemedText style={styles.sectionSubText}>
-            {patient.nextOfKin?.phone || '-'}
-          </ThemedText>
-        </View>
-
-        <View style={styles.sectionRow}>
-          <ThemedText>Relationship</ThemedText>
-          <ThemedText style={styles.sectionSubText}>
-            {patient.nextOfKin?.relationship || '-'}
-          </ThemedText>
-        </View>
+            <ThemedText style={styles.sectionLabel}>{row.label}</ThemedText>
+            <ThemedText
+              style={[
+                styles.sectionSubText,
+                row.label === 'Email' && { textTransform: 'none' },
+              ]}
+            >
+              {row.value || '-'}
+            </ThemedText>
+          </View>
+        ))}
       </View>
 
       {/* Past Appointments */}
-      <View style={styles.section}>
+      <View style={styles.sectionPlain}>
         <View style={styles.pastAppHeader}>
-          <ThemedText style={styles.sectionHeader}>Past Appointment</ThemedText>
+          <ThemedText style={styles.sectionHeader}>
+            Past Appointments
+          </ThemedText>
 
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity activeOpacity={0.7}>
             <ThemedText style={styles.viewAll}>View All</ThemedText>
           </TouchableOpacity>
         </View>
@@ -962,15 +573,16 @@ const DetailsTab = ({
         {pastAppointments.length > 0 ? (
           pastAppointments.map(renderAppointment)
         ) : (
-          <ThemedText
-            style={{
-              marginTop: theme.spacing.md,
-              color: theme.colors.textMuted,
-              fontSize: theme.typography.sizes.sm,
-            }}
-          >
-            No past appointments
-          </ThemedText>
+          <View style={styles.emptyState}>
+            <IconSymbol
+              name="calendar.badge"
+              size={28}
+              color={theme.colors.textMuted}
+            />
+            <ThemedText style={styles.emptyStateText}>
+              No past appointments
+            </ThemedText>
+          </View>
         )}
       </View>
     </View>
@@ -1085,8 +697,8 @@ const PatientDetails = () => {
     StyleSheet.create({
       container: {
         flex: 1,
-        paddingHorizontal: theme.spacing.base,
         backgroundColor: theme.colors.background,
+        paddingTop: theme.spacing.xxl,
       },
 
       scroll: {
@@ -1097,47 +709,78 @@ const PatientDetails = () => {
       },
 
       avatar: {
-        width: 140,
-        height: 140,
+        width: AVATAR_SIZE,
+        height: AVATAR_SIZE,
         borderRadius: theme.radius.full,
-        borderWidth: 10,
+        borderWidth: AVATAR_BORDER,
         borderColor: theme.colors.background,
+        backgroundColor: theme.colors.surface,
+        overflow: 'hidden',
         position: 'absolute',
-        top: -80,
+        top: -AVATAR_SIZE / 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+        elevation: 6,
+      },
+
+      appHeader: {
+        paddingHorizontal: theme.spacing.base,
       },
 
       header: {
-        borderRadius: theme.radius.lg,
+        borderRadius: theme.radius.xl,
         width: '100%',
-        height: theme.spacing.xxl * 5,
         backgroundColor: theme.colors.surfaceCardLight,
-        marginTop: theme.spacing.xxl * 3,
+        marginTop: AVATAR_SIZE / 2 + theme.spacing.base,
+        paddingTop: AVATAR_SIZE / 2 + theme.spacing.md,
+        paddingBottom: theme.spacing.lg,
+        paddingHorizontal: theme.spacing.lg,
         alignItems: 'center',
-        justifyContent: 'center',
         position: 'relative',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 14,
+        elevation: 4,
       },
 
       details: {
-        marginTop: theme.spacing.xxl + 5,
         alignItems: 'center',
         justifyContent: 'center',
       },
 
       headerText: {
         fontSize: theme.typography.sizes.xl,
-        color: theme.colors.textSecondary,
+        fontWeight: '700',
+        color: theme.colors.text,
       },
 
-      headerSubText: {
+      vitals: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: theme.spacing.sm,
         marginTop: theme.spacing.md,
-        fontSize: theme.typography.sizes.md,
-        color: theme.colors.textMuted,
+      },
+
+      vitalChip: {
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.xs,
+        borderRadius: theme.radius.full,
+        backgroundColor: theme.colors.background,
+      },
+
+      vitalChipText: {
+        fontSize: theme.typography.sizes.sm,
+        fontWeight: '600',
+        color: theme.colors.textSecondary,
       },
 
       tabGroup: {
         width: '100%',
-        marginTop: theme.spacing.xl * 2,
-        // overflow: 'hidden',
+        marginTop: theme.spacing.xl,
       },
 
       tabHeaders: {
@@ -1147,7 +790,7 @@ const PatientDetails = () => {
         alignItems: 'center',
         position: 'relative',
         borderBottomWidth: 1,
-        borderBottomColor: theme.colors.textMuted,
+        borderBottomColor: theme.colors.border,
       },
 
       tab: {
@@ -1160,11 +803,12 @@ const PatientDetails = () => {
       tabText: {
         color: theme.colors.textMuted,
         fontSize: theme.typography.sizes.base,
+        fontWeight: '500',
       },
 
       tabTextActive: {
         color: theme.colors.primary.extraDeep,
-        fontWeight: '600',
+        fontWeight: '700',
       },
 
       tabIndicator: {
@@ -1180,13 +824,11 @@ const PatientDetails = () => {
       tabBody: {
         width: '100%',
         overflow: 'hidden',
-        marginTop: theme.spacing.sm,
+        marginTop: theme.spacing.lg,
       },
 
       tabContent: {
         width: '100%',
-        // paddingLeft: -40,
-        // borderWidth: 1,
       },
     })
   );
@@ -1202,15 +844,14 @@ const PatientDetails = () => {
     outputRange: [0, tabWidth / 2],
   });
 
-  const bodyTranslateX = tabAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -0],
-  });
-
   const bodyOpacity = tabAnimation.interpolate({
     inputRange: [0, 0.35, 0.65, 1],
     outputRange: [1, 0.7, 0.7, 1],
   });
+
+  const handleGoBack = () => {
+    router.replace('/patients');
+  };
 
   if (!patient) {
     return (
@@ -1230,6 +871,11 @@ const PatientDetails = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={[]}>
+      <AppHeader
+        title="Patient"
+        onBack={handleGoBack}
+        style={styles.appHeader}
+      />
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -1253,7 +899,10 @@ const PatientDetails = () => {
             />
           ) : (
             <View style={styles.avatar}>
-              <AvatarFromString input={patientName} size={140} />
+              <AvatarFromString
+                input={patientName}
+                size={AVATAR_SIZE - AVATAR_BORDER * 2}
+              />
             </View>
           )}
 
@@ -1262,15 +911,19 @@ const PatientDetails = () => {
               {patientName}
             </ThemedText>
 
-            <ThemedText type="subtitle" style={styles.headerSubText}>
-              {patient.dateOfBirth
-                ? getAge(patient.dateOfBirth, ' yrs')
-                : 'Unknown Age'}
-              {'  •  '}
-              {patient.weight ? `${patient.weight} Kg` : 'Unknown Weight'}
-              {'  •  '}
-              {patient.height ? `${patient.height} cm` : 'Unknown Height'}
-            </ThemedText>
+            <View style={styles.vitals}>
+              {[
+                patient.dateOfBirth
+                  ? getAge(patient.dateOfBirth, ' yrs')
+                  : 'Age –',
+                patient.weight ? `${patient.weight} kg` : 'Weight –',
+                patient.height ? `${patient.height} cm` : 'Height –',
+              ].map((vital) => (
+                <View key={vital} style={styles.vitalChip}>
+                  <ThemedText style={styles.vitalChipText}>{vital}</ThemedText>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
 
@@ -1340,11 +993,6 @@ const PatientDetails = () => {
                 styles.tabContent,
                 {
                   opacity: bodyOpacity,
-                  transform: [
-                    {
-                      translateX: bodyTranslateX,
-                    },
-                  ],
                 },
               ]}
             >

@@ -128,7 +128,7 @@ export default function Patients() {
 
       search: {
         flexDirection: 'row',
-        padding: theme.spacing.md,
+        paddingHorizontal: theme.spacing.md,
         alignItems: 'center',
         justifyContent: 'space-between',
         borderWidth: 1,
@@ -136,13 +136,14 @@ export default function Patients() {
         margin: theme.spacing.md,
         borderRadius: theme.radius.xl,
         position: 'relative',
+        height: 40,
       },
 
       searchInput: {
         width: '100%',
         color: theme.colors.text,
         fontFamily: theme.typography.fonts?.sans,
-        fontSize: theme.typography.sizes.md,
+        fontSize: theme.typography.sizes.sm,
       },
 
       searchIcon: {

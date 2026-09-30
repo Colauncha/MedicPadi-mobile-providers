@@ -7,9 +7,9 @@
     "icon": "./assets/images/icon.png",
     "scheme": "medicpadimobileproviders",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.colauncha-dev.MedicPadimobileproviders"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,14 +18,15 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.colauncha_dev.MedicPadimobileproviders"
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./plugins/withZoomManifest",
       "expo-router",
       [
         "expo-splash-screen",
@@ -39,13 +40,29 @@
           }
         }
       ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 28,
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
       "expo-secure-store",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "aad845ba-0368-4cdd-a352-22b9a29f7cab"
+      }
     }
   }
 }

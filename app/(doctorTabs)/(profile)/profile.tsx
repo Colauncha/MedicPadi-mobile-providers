@@ -318,6 +318,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (!token || !user) {
       router.replace('/login?redirect=profile');
+      return;
     }
 
     (async () => {
@@ -378,7 +379,9 @@ const ProfilePage = () => {
   const businessHours = businessHoursEntry as BusinessHours;
 
   const orderedBusinessHours = DAYS_OF_WEEK.filter(
-    (day) => businessHours[day]
+    (day) =>
+      typeof businessHours[day]?.start === 'number' &&
+      typeof businessHours[day]?.end === 'number'
   ).map((day) => ({
     day,
     label: DAY_LABELS[day],
@@ -448,6 +451,18 @@ const ProfilePage = () => {
           </View>
 
           <View style={styles.headerIconsView}>
+            <TouchableOpacity
+              onPress={() => router.push('/notifications')}
+              accessibilityRole="button"
+              accessibilityLabel="Open Notifications"
+            >
+              <IconSymbol
+                name="bell.fill"
+                color={appTheme.colors.textSecondary}
+                style={styles.headerIcons}
+              />
+            </TouchableOpacity>
+
             <TouchableOpacity
               onPress={() => router.push('/settings')}
               accessibilityRole="button"
@@ -621,7 +636,7 @@ const ProfilePage = () => {
             </ThemedText>
 
             <TouchableOpacity
-              onPress={() => router.push('/editProfile')}
+              onPress={() => router.push('/editWorkingHours')}
               accessibilityRole="button"
               accessibilityLabel="Edit working hours"
               style={styles.editButton}

@@ -117,9 +117,9 @@ export const shadowsLight = {
 };
 
 export const shadowsDark = {
-  mild: '0px 2px 10px 0px rgba(120, 120, 120, 0.1)',
-  base: '0px 2px 30px 0px rgba(120, 120, 120, 0.1)',
-  heavy: '0px 2px 30px 0px rgba(152, 152, 151, 0.2)',
+  mild: '0px 2px 10px 0px rgba(2, 2, 2, 0.7)',
+  base: '0px 2px 30px 0px rgba(2, 2, 2, 0.7)',
+  heavy: '0px 2px 30px 0px rgba(0, 0, 0, 0.7)',
 };
 
 export const radius = {

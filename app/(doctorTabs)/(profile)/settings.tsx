@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { AppHeader } from '@/components/ui/AppHeader';
 import DropDown from '@/components/ui/DropDown';
 import { Dropdown as DD2, DropdownOption } from '@/components/ui/DropDown2';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -60,10 +61,15 @@ export default function Settings() {
         backgroundColor: theme.colors.background,
       },
 
+      appHeader: {
+        paddingHorizontal: theme.spacing.base,
+        marginBottom: 0,
+      },
+
       scroll: {
         flexGrow: 1,
         paddingHorizontal: theme.spacing.base,
-        paddingTop: theme.spacing.xl,
+        paddingTop: theme.spacing.base,
 
         // Important:
         // The tab bar is absolute, so the scroll content needs
@@ -71,14 +77,33 @@ export default function Settings() {
         paddingBottom: TAB_BAR_HEIGHT + theme.spacing.xxl,
       },
 
+      pageHeader: {
+        fontSize: theme.typography.sizes.xl,
+        fontFamily: theme.typography.fonts?.rounded,
+        fontWeight: '800',
+        color: theme.colors.text,
+        marginBottom: theme.spacing.xl,
+      },
+
+      groupLabel: {
+        fontSize: theme.typography.sizes.sm,
+        fontWeight: '700',
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+        color: theme.colors.textMuted,
+        marginBottom: theme.spacing.sm,
+        marginLeft: theme.spacing.xs,
+      },
+
       optionsContainer: {
         width: '100%',
-        borderWidth: 1,
+        borderWidth: 0.5,
         borderColor: theme.colors.border,
-        borderRadius: theme.radius.md,
-        overflow: 'hidden',
+        borderRadius: theme.radius.lg,
+        // overflow: 'hidden',
         marginBottom: theme.spacing.xxl,
         boxShadow: theme.shadows.mild,
+        elevation: 3,
       },
 
       options: {
@@ -90,12 +115,17 @@ export default function Settings() {
         paddingHorizontal: theme.spacing.md,
         paddingVertical: theme.spacing.lg,
 
-        borderBottomWidth: 1,
+        borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: theme.colors.border,
       },
 
       optionsLast: {
         borderBottomWidth: 0,
+      },
+
+      optionsElevated: {
+        zIndex: 20,
+        // elevation: 20,
       },
 
       optionsContent: {
@@ -106,10 +136,12 @@ export default function Settings() {
       optionsMainText: {
         color: theme.colors.text,
         fontSize: theme.typography.sizes.md,
+        fontWeight: '600',
       },
 
       optionsSubText: {
         color: theme.colors.textMuted,
+        fontSize: theme.typography.sizes.sm,
         marginTop: theme.spacing.xs,
       },
 
@@ -128,37 +160,41 @@ export default function Settings() {
 
       newsSection: {
         width: '100%',
-        borderWidth: 1,
-        borderRadius: theme.radius.md,
+        borderWidth: 0.5,
+        borderRadius: theme.radius.lg,
         borderColor: theme.colors.border,
         paddingHorizontal: theme.spacing.md,
-        paddingVertical: theme.spacing.sm,
+        paddingVertical: theme.spacing.md,
         backgroundColor: theme.colors.background,
         boxShadow: theme.shadows.base,
+        elevation: 3,
+        marginBottom: theme.spacing.lg,
       },
 
       title: {
         fontFamily: theme.typography.fonts?.rounded,
-        fontSize: theme.typography.sizes.xl,
-        fontWeight: 'bold',
+        fontSize: theme.typography.sizes.lg,
+        fontWeight: '700',
+        color: theme.colors.text,
         marginBottom: theme.spacing.md,
-        paddingVertical: theme.spacing.md,
-        borderBottomWidth: 1,
+        paddingBottom: theme.spacing.md,
+        borderBottomWidth: StyleSheet.hairlineWidth,
         borderColor: theme.colors.border,
       },
 
       subtitle: {
         fontFamily: theme.typography.fonts?.mono,
         fontSize: theme.typography.sizes.sm,
-        paddingVertical: theme.spacing.md,
+        paddingVertical: theme.spacing.sm,
         color: theme.colors.textMuted,
         textAlign: 'center',
+        lineHeight: theme.typography.sizes.sm * 1.5,
       },
 
       newsSubSection: {
         borderRadius: theme.radius.md,
         paddingHorizontal: theme.spacing.lg,
-        paddingVertical: theme.spacing.lg,
+        paddingVertical: theme.spacing.xl,
         alignItems: 'center',
         backgroundColor: theme.colors.surfaceCard,
       },
@@ -168,19 +204,28 @@ export default function Settings() {
         backgroundColor: theme.colors.background,
         padding: theme.spacing.lg,
         borderRadius: theme.radius.full,
+        marginBottom: theme.spacing.sm,
+        borderWidth: 0.5,
+        borderColor: theme.colors.border,
       },
 
       logout: {
-        marginTop: theme.spacing.xl,
+        marginTop: theme.spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: theme.spacing.sm,
 
         // Gives the button a decent touch target.
         paddingVertical: theme.spacing.md,
-        alignItems: 'center',
+        borderRadius: theme.radius.lg,
+        backgroundColor: theme.colors.dangerBg,
       },
 
       logoutText: {
         color: theme.colors.danger,
         fontSize: theme.typography.sizes.base,
+        fontWeight: '700',
       },
     })
   );
@@ -188,20 +233,20 @@ export default function Settings() {
   const isWindows = Platform.OS === 'windows';
 
   return (
-    <SafeAreaView style={styles.container} edges={[]}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader title="Settings" style={styles.appHeader} />
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* <TouchableOpacity>
-
-        </TouchableOpacity> */}
+        {/* <ThemedText style={styles.pageHeader}>Settings</ThemedText> */}
 
         {/* Settings */}
+        <ThemedText style={styles.groupLabel}>General</ThemedText>
         <ThemedView style={styles.optionsContainer}>
           {/* Language */}
-          <View style={styles.options}>
+          <View style={[styles.options, styles.optionsLast]}>
             <View style={styles.optionsContent}>
               <Text style={styles.optionsMainText}>Language</Text>
 
@@ -216,32 +261,12 @@ export default function Settings() {
               disabled
             />
           </View>
+        </ThemedView>
 
-          {/* Theme */}
-          <View style={styles.options}>
-            <DD2
-              label="Theme"
-              value={mode}
-              placeholder="Select theme"
-              description="Select your prefered theme"
-              mainTextStyle={styles.optionsMainText}
-              descriptionTextStyle={styles.optionsSubText}
-              options={themeOptions}
-              isOpen={openDropdown === 'theme'}
-              onOpenChange={(open) => setOpenDropdown(open ? 'theme' : null)}
-              onChange={(value) => {
-                handleModeChange(value);
-                setOpenDropdown(null);
-              }}
-              inLine
-              // style={{
-              //   // flexDirection: 'row',
-              //   alignItems: 'center',
-              //   justifyContent: 'space-between',
-              // }}
-            />
-          </View>
-
+        <ThemedText style={styles.groupLabel}>
+          Security & Notifications
+        </ThemedText>
+        <ThemedView style={styles.optionsContainer}>
           {/* 2FA */}
           <View style={styles.options}>
             <View style={styles.optionsContent}>
@@ -259,6 +284,31 @@ export default function Settings() {
               bgStyle={styles.optionsToggleButtonBg}
               switchStyle={styles.optionsToggleButtonSwitch}
               currentState={enable2Fa}
+            />
+          </View>
+
+          {/* Theme */}
+          <View
+            style={[
+              styles.options,
+              openDropdown === 'theme' && styles.optionsElevated,
+            ]}
+          >
+            <DD2
+              label="Theme"
+              value={mode}
+              placeholder="Select theme"
+              description="Select your prefered theme"
+              mainTextStyle={styles.optionsMainText}
+              descriptionTextStyle={styles.optionsSubText}
+              options={themeOptions}
+              isOpen={openDropdown === 'theme'}
+              onOpenChange={(open) => setOpenDropdown(open ? 'theme' : null)}
+              onChange={(value) => {
+                handleModeChange(value);
+                setOpenDropdown(null);
+              }}
+              inLine
             />
           </View>
 
@@ -322,7 +372,7 @@ export default function Settings() {
             <IconSymbol
               name="arrow.down.to.line"
               style={styles.newsSubSectionIcon}
-              size={30}
+              size={26}
             />
 
             <ThemedText type="subtitle" style={styles.subtitle}>
@@ -339,6 +389,11 @@ export default function Settings() {
           accessibilityLabel="Log out"
         >
           <View style={styles.logout}>
+            <IconSymbol
+              name="door.left.hand.open"
+              size={18}
+              color={styles.logoutText.color}
+            />
             <ThemedText type="subtitle" style={styles.logoutText}>
               Log Out
             </ThemedText>

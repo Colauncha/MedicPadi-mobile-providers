@@ -8,18 +8,18 @@ import { Button } from '@/components/ui/Button';
 import { IconSymbol, IconSymbolName } from '@/components/ui/icon-symbol';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type UserTypes = 'consultant' | 'pharmacy' | 'laboratory';
 
-const options: { type: UserTypes; Icon: IconSymbolName; title: string; description: string }[] = [
+const options: {
+  type: UserTypes;
+  Icon: IconSymbolName;
+  title: string;
+  description: string;
+}[] = [
   {
     type: 'consultant',
     Icon: 'stethoscope',
@@ -57,7 +57,7 @@ export const UserType = () => {
         justifyContent: 'center',
         padding: theme.spacing.base,
       },
-      scroll: { flexGrow: 1, alignItems: 'center', justifyContent: 'center',},
+      scroll: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
       card: {
         backgroundColor: theme.colors.surface,
         borderRadius: theme.radius.xl,
@@ -117,44 +117,89 @@ export const UserType = () => {
         width: '100%',
       },
       iconStyle: {
-        color: theme.colors.textSecondary
-      }
+        color: theme.colors.textSecondary,
+      },
+
+      loginRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: theme.spacing.base,
+      },
+      loginText: {
+        fontFamily: theme.typography.fonts?.sans,
+        fontSize: theme.typography.sizes.md,
+        color: '#454545',
+      },
+      loginLink: {
+        fontFamily: theme.typography.fonts?.sans,
+        fontSize: theme.typography.sizes.md,
+        color: theme.colors.primary.extraDeep,
+      },
     })
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <ThemedView style={styles.card}>
-        <View style={styles.header}>
-          <ThemedText style={styles.title} type='title'>User Type</ThemedText>
-          <ThemedText style={styles.subtitle} type='subtitle'>Select user type that you want</ThemedText>
-        </View>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedView style={styles.card}>
+          <View style={styles.header}>
+            <ThemedText style={styles.title} type="title">
+              User Type
+            </ThemedText>
+            <ThemedText style={styles.subtitle} type="subtitle">
+              Select user type that you want
+            </ThemedText>
+          </View>
 
-        <View style={styles.options}>
-          {options.map((opt) => (
-            <TouchableOpacity
-              key={opt.type}
-              style={[styles.option, selected === opt.type && styles.optionSelected]}
-              onPress={() => setSelected(opt.type)}
-              activeOpacity={0.85}
-            >
-              <IconSymbol name={opt.Icon} size={48} style={styles.iconStyle} />
-              <ThemedText style={[styles.optionTitle, selected === opt.type && styles.optionTitleSelected]}>
-                {opt.title}
-              </ThemedText>
-              <ThemedText style={styles.optionDesc}>{opt.description}</ThemedText>
+          <View style={styles.options}>
+            {options.map((opt) => (
+              <TouchableOpacity
+                key={opt.type}
+                style={[
+                  styles.option,
+                  selected === opt.type && styles.optionSelected,
+                ]}
+                onPress={() => setSelected(opt.type)}
+                activeOpacity={0.85}
+              >
+                <IconSymbol
+                  name={opt.Icon}
+                  size={48}
+                  style={styles.iconStyle}
+                />
+                <ThemedText
+                  style={[
+                    styles.optionTitle,
+                    selected === opt.type && styles.optionTitleSelected,
+                  ]}
+                >
+                  {opt.title}
+                </ThemedText>
+                <ThemedText style={styles.optionDesc}>
+                  {opt.description}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Button
+            label="Continue"
+            onPress={handleContinue}
+            disabled={!selected}
+            style={styles.btn}
+          />
+          <View style={styles.loginRow}>
+            <ThemedText style={styles.loginText}>
+              Have an existing account?{' '}
+            </ThemedText>
+            <TouchableOpacity onPress={() => router.push('/login')}>
+              <ThemedText style={styles.loginLink}>Log in</ThemedText>
             </TouchableOpacity>
-          ))}
-        </View>
-
-        <Button
-          label="Continue"
-          onPress={handleContinue}
-          disabled={!selected}
-          style={styles.btn}
-        />
-      </ThemedView>
+          </View>
+        </ThemedView>
       </ScrollView>
     </SafeAreaView>
   );

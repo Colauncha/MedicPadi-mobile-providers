@@ -1,3 +1,4 @@
+import { registerForPushNotifications } from '@/services/registerForPush';
 import { storage } from '@/utils/storage';
 import {
   ReactNode,
@@ -8,6 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { Platform } from 'react-native';
 import {
   AuthUser,
   ProfileData,
@@ -16,6 +18,7 @@ import {
   apiLogin,
   apiLogout,
   apiRegister,
+  apiRegisterDeviceNotif,
   clearStoredToken,
   clearStoredUser,
   getStoredToken,
@@ -36,11 +39,15 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   setProfile: (p: ProfileData | null) => void;
+  isNewReg: boolean;
+  markFreshRegistration: () => Promise<void>;
+  completeFreshRegistration: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const IS_LOGGED_IN = 'isLoggedIn';
+const FRESH_REGISTRATION = 'fresh_registration';
 
 export const useAuth = (): AuthContextType => {
   const ctx = useContext(AuthContext);
@@ -81,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isNewReg, setIsNewReg] = useState(false);
 
   const expiryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -165,13 +173,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     (async () => {
       try {
-        const [tok, usr, isLogged] = await Promise.all([
+        const [tok, usr, isLogged, freshReg] = await Promise.all([
           getStoredToken(),
           getStoredUser(),
           storage.getItem(IS_LOGGED_IN),
+          storage.getItem(FRESH_REGISTRATION),
         ]);
 
         if (!mounted) return;
+
+        setIsNewReg(freshReg === '1');
 
         if (tok) {
           setToken(tok);
@@ -209,6 +220,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(authUser || null);
     setProfile(profileRes);
     setIsLoggedIn(true);
+    const expoNotifToken = await registerForPushNotifications();
+    if (Platform.OS === 'web') {
+      // SETUP Device registration for web
+    } else if (Platform.OS === 'android' || Platform.OS === 'ios') {
+      await apiRegisterDeviceNotif(accessToken, {
+        platform: Platform.OS,
+        token: expoNotifToken.token,
+        deviceName: expoNotifToken.device,
+      });
+    } else {
+      return;
+    }
   };
 
   const register = async (data: RegisterData) => {
@@ -239,6 +262,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (token) await fetchProfile(token);
   };
 
+  const markFreshRegistration = async () => {
+    setIsNewReg(true);
+    try {
+      await storage.setItem(FRESH_REGISTRATION, '1');
+    } catch {
+      /* ignore — state is already set for this session */
+    }
+  };
+
+  // Ends the fresh-registration flow; the root Stack guards then
+  // redirect to the user's tabs.
+  const completeFreshRegistration = async () => {
+    setIsNewReg(false);
+    try {
+      await storage.deleteItem(FRESH_REGISTRATION);
+    } catch (error) {
+      console.error('Failed to clear fresh registration flag:', error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -252,6 +295,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         refreshProfile,
         setProfile,
+        isNewReg,
+        markFreshRegistration,
+        completeFreshRegistration,
       }}
     >
       {children}

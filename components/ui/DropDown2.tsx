@@ -57,7 +57,6 @@ export function Dropdown({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        position: 'relative',
       },
 
       labelContainer: {
@@ -101,6 +100,7 @@ export function Dropdown({
         backgroundColor: theme.colors.surfaceCard,
         overflow: 'hidden',
         zIndex: 99,
+        // position: 'absolute',
       },
 
       inLineMenu: {
