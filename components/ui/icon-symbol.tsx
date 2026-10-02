@@ -39,6 +39,7 @@ const MAPPING = {
   magnifyingglass: 'search',
   plus: 'add',
   'trash.fill': 'delete',
+  'square.and.arrow.up': 'share',
   'exclamationmark.triangle.fill': 'warning',
   'heart.fill': 'favorite',
   'lock.fill': 'lock',

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
-import { apiUpdateProfile, BusinessHours } from '@/services/api';
+import { BusinessHours, updateBusinessHours } from '@/services/api';
 import { useTheme } from '@/theme/ThemeProvider';
 import { formatTimeAdv } from '@/utils/formatter';
 
@@ -165,7 +165,7 @@ const EditWorkingHours = () => {
     try {
       setIsSubmitting(true);
 
-      await apiUpdateProfile({ businessHours: payload }, token);
+      await updateBusinessHours(payload, token);
       await refreshProfile();
 
       Alert.alert(

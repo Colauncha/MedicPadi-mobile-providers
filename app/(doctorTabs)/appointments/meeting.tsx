@@ -1,7 +1,11 @@
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
-import { apiCompleteAppointment, apiGetZoomSignature } from '@/services/api';
+import {
+  apiCompleteAppointment,
+  apiGetZAK,
+  apiGetZoomSignature,
+} from '@/services/api';
 import { useTheme } from '@/theme/ThemeProvider';
 import {
   ZoomSDKProvider,
@@ -26,19 +30,6 @@ const JOIN_SUCCESS_CODES = [
   'MobileRTCMeetError_Success',
   'MEETING_ERROR_SUCCESS',
 ];
-
-/*
- * Extract the host ZAK from the start link, ignoring any params after it.
- */
-const getZakFromLink = (link?: string) => {
-  if (!link) {
-    return null;
-  }
-
-  const match = /[?&]zak=([^&#]+)/.exec(link);
-
-  return match ? decodeURIComponent(match[1]) : null;
-};
 
 const ZoomMeetingContent = ({
   meetingNumber,
@@ -225,24 +216,29 @@ const ZoomMeetingContent = ({
 
 const ZoomMeetingScreen = () => {
   const { token, user, profile } = useAuth();
-  const { appointmentId, meetingNumber, meetingLink } = useLocalSearchParams();
+  const { appointmentId, meetingNumber } = useLocalSearchParams();
 
   const [signature, setSignature] = useState<string | null>(null);
-  const zak = getZakFromLink(meetingLink as string | undefined);
-
-  const [error, setError] = useState<string | null>(() =>
-    zak
-      ? null
-      : 'This appointment has no valid host link. Please contact support.'
-  );
+  const [zak, setZak] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { theme: appTheme } = useTheme();
 
   useEffect(() => {
-    if (!token || !zak) return;
+    if (!token) return;
     apiGetZoomSignature(appointmentId as string, token)
       .then((res) => setSignature(res.signature))
       .catch((e) => setError(e.message ?? 'Failed to prepare the meeting'));
-  }, [appointmentId, token, zak]);
+    apiGetZAK(appointmentId as string, token)
+      .then((res) => {
+        if (!res.zak) {
+          throw new Error(
+            'This appointment has no valid host link. Please contact support.'
+          );
+        }
+        setZak(res.zak);
+      })
+      .catch((e) => setError(e.message ?? 'Failed to prepare the meeting'));
+  }, [appointmentId, token]);
 
   const userName =
     [profile?.profile?.firstName, profile?.profile?.lastName]

@@ -221,6 +221,17 @@ const BookingDetailsScreen = () => {
     });
   };
 
+  const handleReport = () => {
+    if (!appt) {
+      return;
+    }
+
+    router.navigate({
+      pathname: '/patients/reports',
+      params: { patientId: appt.patient_id, appointmentId: appt.id },
+    });
+  };
+
   const handleAccept = async () => {
     if (!appt || !token || accepting) {
       return;
@@ -239,8 +250,6 @@ const BookingDetailsScreen = () => {
       setAccepting(false);
     }
   };
-
-  console.log(appt);
 
   const fullName = patient
     ? [patient.firstName, patient.lastName].filter(Boolean).join(' ')
@@ -271,16 +280,6 @@ const BookingDetailsScreen = () => {
         minute: '2-digit',
       })
     : '—';
-
-  // const handleVerifyPayment = async () => {
-  //   const response = await apiVerifyTransaction(
-  //     paymentData.reference,
-  //     token || ''
-  //   );
-  //   if (response.status) {
-  //     handleReload();
-  //   }
-  // };
 
   const handleGoBack = () => {
     if (router.canGoBack()) {
@@ -637,37 +636,6 @@ const BookingDetailsScreen = () => {
             <RefreshControl refreshing={loading} onRefresh={handleReload} />
           }
         >
-          {/* Banner */}
-          {/* {banner && (
-            <View
-              style={[
-                styles.banner,
-                {
-                  borderColor: banner
-                    ? banner.borderColor
-                    : appTheme.colors.primary.extraDeep,
-                  backgroundColor: banner
-                    ? banner.bgColor
-                    : appTheme.colors.primary.shallow,
-                },
-              ]}
-            >
-              <IconSymbol
-                name={banner ? banner.icon : 'checkmark'}
-                size={24}
-                color={banner ? banner.color : appTheme.colors.text}
-              />
-              <Text
-                style={[
-                  styles.bannerText,
-                  { color: banner ? banner.color : appTheme.colors.text },
-                ]}
-              >
-                {banner ? banner.message : 'confirmed'}
-              </Text>
-            </View>
-          )} */}
-
           {/* Doctors card */}
           <View style={styles.heroCard}>
             <View style={styles.heroInner}>
@@ -834,18 +802,6 @@ const BookingDetailsScreen = () => {
               />
             </View>
           </View>
-          {/* {appt?.status === 'completed' && ( */}
-          {appt?.status && (
-            <View style={{ marginBottom: appTheme.spacing.base }}>
-              <Button
-                label="Reports and Review"
-                onPress={() => {}}
-                loading={loading}
-                disabled={!appt?.provider_id}
-                style={styles.rescheduleBtn}
-              />
-            </View>
-          )}
 
           {/* Uploaded Files */}
           <View style={styles.card}>
@@ -938,24 +894,36 @@ const BookingDetailsScreen = () => {
                 {callHint && <Text style={styles.callHint}>{callHint}</Text>}
               </>
             )}
-            <Button
-              label="Cancel Appointment"
-              // onPress={() =>
-              //   router.navigate('/cancel-appointment', {
-              //     providerId: appt?.provider_id,
-              //   })
-              // }
-              onPress={() => {}}
-              loading={loading}
-              disabled={!appt?.provider_id}
-              style={styles.cancelBtn}
-              textStyle={{ color: appTheme.colors.danger }}
-            />
+            {appt?.status === 'completed' && (
+              <Button
+                label="Reports"
+                onPress={handleReport}
+                loading={loading}
+                disabled={!appt?.provider_id}
+                style={styles.rescheduleBtn}
+              />
+            )}
+            {appt?.status === 'confirmed' ||
+              (appt?.status === 'pending' && (
+                <Button
+                  label="Cancel Appointment"
+                  // onPress={() =>
+                  //   router.navigate('/cancel-appointment', {
+                  //     providerId: appt?.provider_id,
+                  //   })
+                  // }
+                  onPress={() => {}}
+                  loading={loading}
+                  disabled={!appt?.provider_id}
+                  style={styles.cancelBtn}
+                  textStyle={{ color: appTheme.colors.danger }}
+                />
+              ))}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-};;
+};
 
 export default BookingDetailsScreen;

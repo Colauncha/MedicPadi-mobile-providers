@@ -1,6 +1,5 @@
 import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
-import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -16,8 +15,6 @@ export const unstable_settings = {
 export default function TabLayout() {
   const { theme } = useTheme();
   const { user } = useAuth();
-
-  console.log('TabLayout user:', user);
 
   return (
     <Tabs

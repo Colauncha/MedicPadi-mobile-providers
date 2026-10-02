@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/context/AuthContext';
 import { useThemedStyles } from '@/hooks/useThemedStyle';
 import { Link, router, useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -85,7 +85,6 @@ const Register = () => {
         },
       ]);
     } catch (e: any) {
-      console.log(e);
       Alert.alert('Registration failed', e.message ?? 'Please try again.');
     } finally {
       setLoading(false);

@@ -8,6 +8,7 @@ import {
   TextInputProps,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 // import { colors, theme.typography, theme.spacing, radius } from '../theme';
 
@@ -19,6 +20,7 @@ interface InputProps extends TextInputProps {
   leftIcon?: React.ReactNode;
   showPasswordToggle?: boolean;
   disabled?: boolean;
+  containerStyle?: ViewStyle;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -30,6 +32,7 @@ export const Input: React.FC<InputProps> = ({
   showPasswordToggle = false,
   secureTextEntry,
   disabled,
+  containerStyle,
   style,
   ...props
 }) => {
@@ -90,7 +93,7 @@ export const Input: React.FC<InputProps> = ({
   return (
     <View style={styles.wrapper}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.container, error ? styles.containerError : null]}>
+      <View style={[styles.container, error ? styles.containerError : null, containerStyle]}>
         {leftIcon && <View style={styles.icon}>{leftIcon}</View>}
         <TextInput
           style={[styles.input, style]}

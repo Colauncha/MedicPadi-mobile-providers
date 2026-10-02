@@ -1,4 +1,5 @@
 import AvatarFromString from '@/components/avatar';
+import { PatientReports } from '@/components/patients/PatientReports';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -589,18 +590,6 @@ const DetailsTab = ({
   );
 };
 
-const ReportsTab = () => {
-  return (
-    <View
-      style={{
-        paddingVertical: 20,
-      }}
-    >
-      {/* Reports content goes here */}
-    </View>
-  );
-};
-
 const PatientDetails = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { token, user } = useAuth();
@@ -609,6 +598,7 @@ const PatientDetails = () => {
   const [patient, setPatient] = useState<ProfileFields | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [currentTab, setCurrentTab] = useState<Tab>('detail');
+  const [reportsRefreshKey, setReportsRefreshKey] = useState(0);
 
   const [tabAnimation] = useState(() => new Animated.Value(0));
 
@@ -679,6 +669,7 @@ const PatientDetails = () => {
     }
 
     setRefreshing(true);
+    setReportsRefreshKey((key) => key + 1);
 
     try {
       const response = await apiGetProfileById(id, 'patient', token);
@@ -1005,7 +996,13 @@ const PatientDetails = () => {
                   theme={appTheme}
                 />
               ) : (
-                <ReportsTab />
+                <View style={{ paddingVertical: 20 }}>
+                  <PatientReports
+                    patientId={id}
+                    patient={patient}
+                    refreshKey={reportsRefreshKey}
+                  />
+                </View>
               )}
             </Animated.View>
           </View>

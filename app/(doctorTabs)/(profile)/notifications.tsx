@@ -207,7 +207,7 @@ export default function NotificationsScreen() {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         paddingHorizontal: theme.spacing.base,
-        paddingTop: theme.spacing.sm,
+        paddingVertical: theme.spacing.sm,
       },
       markAllButton: {
         paddingVertical: theme.spacing.xs,
